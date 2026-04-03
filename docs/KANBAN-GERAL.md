@@ -23,8 +23,8 @@
 
 | Fase | Tarefas | Status | Descrição |
 |------|:-------:|:------:|-----------|
-| **FASE 0** | 8 | 🔲 | Setup & Infraestrutura |
-| **FASE 1** | 8 | 🔲 | Core Engine (Conversão & UI) |
+| **FASE 0** | 8 | ✅ | Setup & Infraestrutura |
+| **FASE 1** | 8 | � | Core Engine (Conversão & UI) |
 | **FASE 2** | 7 | 🔲 | Auth & SaaS (Usuários & Limites) |
 | **FASE 3** | 6 | 🔲 | Monetização (Mercado Pago) |
 | **FASE 4** | 7 | 🔲 | Polish, Landing & Deploy |
@@ -41,14 +41,14 @@
 
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
-| 0.1 | 🔲 | **Inicializar projeto Next.js 14** — `npx create-next-app@latest pdffull --typescript --tailwind --app --src-dir` |
-| 0.2 | 🔲 | **Configurar shadcn/ui** — `npx shadcn-ui@latest init` + instalar componentes base (Button, Card, Dialog, Toast) |
-| 0.3 | 🔲 | **Criar projeto Supabase** — Novo projeto dedicado, anotar URL + chaves. Criar tabelas `profiles`, `conversions`, `subscriptions` com RLS |
-| 0.4 | 🔲 | **Configurar Supabase Client** — `@supabase/supabase-js` + `@supabase/ssr`, criar `lib/supabase/client.ts` e `lib/supabase/server.ts` |
-| 0.5 | 🔲 | **Configurar Cloudflare R2** — Criar bucket `pdffull-storage`, gerar Access Key, configurar CORS para upload direto |
-| 0.6 | 🔲 | **Configurar PWA** — Criar `manifest.json` com ícones, `next-pwa` ou Service Worker manual, meta tags para installable |
-| 0.7 | 🔲 | **Configurar `.env.local`** — Preencher variáveis a partir do `.env.example` (Supabase, R2, App URL) |
-| 0.8 | 🔲 | **Estrutura de pastas** — Criar diretórios: `(auth)`, `(dashboard)`, `api/`, `components/`, `lib/`, `hooks/`, `types/` |
+| 0.1 | ✅ | **Inicializar projeto Next.js 14** — `npx create-next-app@latest pdffull --typescript --tailwind --app --src-dir` |
+| 0.2 | ✅ | **Configurar shadcn/ui** — `npx shadcn-ui@latest init` + instalar componentes base (Button, Card, Dialog, Toast) |
+| 0.3 | ✅ | **Criar projeto Supabase** — Novo projeto dedicado, anotar URL + chaves. Criar tabelas `profiles`, `conversions`, `subscriptions` com RLS |
+| 0.4 | ✅ | **Configurar Supabase Client** — `@supabase/supabase-js` + `@supabase/ssr`, criar `lib/supabase/client.ts` e `lib/supabase/server.ts` |
+| 0.5 | ✅ | **Configurar Cloudflare R2** — Criar bucket `pdffull-storage`, gerar Access Key, configurar CORS para upload direto |
+| 0.6 | ✅ | **Configurar PWA** — Criar `manifest.json` com ícones, `next-pwa` ou Service Worker manual, meta tags para installable |
+| 0.7 | ✅ | **Configurar `.env.local`** — Preencher variáveis a partir do `.env.example` (Supabase, R2, App URL) |
+| 0.8 | ✅ | **Estrutura de pastas** — Criar diretórios: `(auth)`, `(dashboard)`, `api/`, `components/`, `lib/`, `hooks/`, `types/` |
 
 ---
 

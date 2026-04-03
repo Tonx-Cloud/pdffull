@@ -24,8 +24,8 @@
 | Fase | Tarefas | Status | Descrição |
 |------|:-------:|:------:|-----------|
 | **FASE 0** | 8 | ✅ | Setup & Infraestrutura |
-| **FASE 1** | 8 | � | Core Engine (Conversão & UI) |
-| **FASE 2** | 7 | 🔲 | Auth & SaaS (Usuários & Limites) |
+| **FASE 1** | 8 | ✅ | Core Engine (Conversão & UI) |
+| **FASE 2** | 7 | � | Auth & SaaS (Usuários & Limites) |
 | **FASE 3** | 6 | 🔲 | Monetização (Mercado Pago) |
 | **FASE 4** | 7 | 🔲 | Polish, Landing & Deploy |
 | **FASE 5** | 5 | 🔲 | Publicação nas Lojas |
@@ -60,14 +60,14 @@
 
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
-| 1.1 | 🔲 | **Componente de Câmera Nativa** — `<input type="file" accept="image/*" capture="environment" />` + fallback para galeria |
-| 1.2 | 🔲 | **Pipeline de Compressão** — Usar `browser-image-compression` (maxSizeMB: 1, maxWidthOrHeight: 1920), criar `lib/pdf/compress.ts` |
-| 1.3 | 🔲 | **Geração de PDF** — Usar `jsPDF` para converter imagem comprimida em PDF, ajustar proporções automaticamente, criar `lib/pdf/generate.ts` |
-| 1.4 | 🔲 | **Múltiplas fotos → 1 PDF** — Interface para adicionar várias fotos, reordenar (drag & drop), remover, gerar PDF multi-página |
-| 1.5 | 🔲 | **Preview do PDF** — Componente `pdf-preview.tsx` para visualizar antes de baixar/compartilhar |
-| 1.6 | 🔲 | **Download direto** — Botão para salvar PDF no dispositivo via `URL.createObjectURL()` |
-| 1.7 | 🔲 | **UI Minimalista** — Tela principal com botão central "CONVERTER", progress bar, resultado com ações (download, compartilhar) |
-| 1.8 | 🔲 | **Orientação automática** — Detectar se imagem é retrato/paisagem e ajustar página do PDF correspondente |
+| 1.1 | ✅ | **Componente de Câmera Nativa** — `<input type="file" accept="image/*" capture="environment" />` + fallback para galeria |
+| 1.2 | ✅ | **Pipeline de Compressão** — Usar `browser-image-compression` (maxSizeMB: 1, maxWidthOrHeight: 1920), criar `lib/pdf/compress.ts` |
+| 1.3 | ✅ | **Geração de PDF** — Usar `jsPDF` para converter imagem comprimida em PDF, ajustar proporções automaticamente, criar `lib/pdf/generate.ts` |
+| 1.4 | ✅ | **Múltiplas fotos → 1 PDF** — Interface para adicionar várias fotos, reordenar (drag & drop), remover, gerar PDF multi-página |
+| 1.5 | ✅ | **Preview do PDF** — Componente `pdf-preview.tsx` para visualizar antes de baixar/compartilhar |
+| 1.6 | ✅ | **Download direto** — Botão para salvar PDF no dispositivo via `URL.createObjectURL()` |
+| 1.7 | ✅ | **UI Minimalista** — Tela principal com botão central "CONVERTER", progress bar, resultado com ações (download, compartilhar) |
+| 1.8 | ✅ | **Orientação automática** — Detectar se imagem é retrato/paisagem e ajustar página do PDF correspondente |
 
 ---
 

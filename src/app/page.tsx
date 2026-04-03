@@ -130,6 +130,9 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t bg-white px-4 py-6 text-center text-sm text-muted-foreground space-y-2">
         <div className="flex justify-center gap-4">
+          <Link href="/sobre" className="hover:text-blue-600 hover:underline">
+            Sobre Nós
+          </Link>
           <Link href="/termos" className="hover:text-blue-600 hover:underline">
             Termos de Uso
           </Link>

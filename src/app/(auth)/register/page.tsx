@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const supabase = createClient();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -22,7 +23,7 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?terms=1`,
       },
     });
 
@@ -39,7 +40,7 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?terms=1`,
         queryParams: { prompt: "select_account" },
       },
     });
@@ -85,10 +86,30 @@ export default function RegisterPage() {
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
+        <label className="flex items-start gap-2 cursor-pointer text-sm">
+          <input
+            type="checkbox"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-blue-600"
+          />
+          <span className="text-muted-foreground">
+            Li e aceito os{" "}
+            <Link href="/termos" className="text-blue-600 hover:underline" target="_blank">
+              Termos de Uso
+            </Link>{" "}
+            e a{" "}
+            <Link href="/privacidade" className="text-blue-600 hover:underline" target="_blank">
+              Política de Privacidade
+            </Link>
+          </span>
+        </label>
+
         <Button
           variant="outline"
           className="w-full h-11 gap-2"
           onClick={handleGoogleRegister}
+          disabled={!termsAccepted}
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path
@@ -134,7 +155,7 @@ export default function RegisterPage() {
           <Button
             type="submit"
             className="w-full h-11 bg-blue-600 hover:bg-blue-700"
-            disabled={loading}
+            disabled={loading || !termsAccepted}
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

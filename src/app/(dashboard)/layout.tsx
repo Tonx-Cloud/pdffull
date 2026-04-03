@@ -1,3 +1,5 @@
+import { TermsAcceptanceModal } from "@/components/terms-acceptance-modal";
+
 export const dynamic = "force-dynamic";
 
 export default function DashboardLayout({
@@ -26,6 +28,7 @@ export default function DashboardLayout({
       <main className="flex-1 p-4">
         <div className="mx-auto max-w-4xl">{children}</div>
       </main>
+      <TermsAcceptanceModal />
     </div>
   );
 }

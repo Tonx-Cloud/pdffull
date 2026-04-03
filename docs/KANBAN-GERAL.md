@@ -27,7 +27,7 @@
 | **FASE 1** | 8 | ✅ | Core Engine (Conversão & UI) |
 | **FASE 2** | 7 | ✅ | Auth & SaaS (Usuários & Limites) |
 | **FASE 3** | 6 | ✅ | Monetização (Mercado Pago) |
-| **FASE 4** | 7 | 🔲 | Polish, Landing & Deploy |
+| **FASE 4** | 7 | ✅ | Polish, Landing & Deploy |
 | **FASE 5** | 5 | 🔲 | Publicação nas Lojas |
 | **TOTAL** | **41** | 🔲 | Do setup ao lançamento |
 
@@ -115,13 +115,13 @@
 
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
-| 4.1 | 🔲 | **Landing Page** — Página `/` com hero, benefícios, demonstração visual, planos/preços, CTA de cadastro, footer |
-| 4.2 | 🔲 | **SEO & Meta Tags** — Open Graph, Twitter Card, favicon, sitemap.xml, robots.txt |
+| 4.1 | ✅ | **Landing Page** — Página `/` com hero, benefícios, demonstração visual, planos/preços, CTA de cadastro, footer |
+| 4.2 | ✅ | **SEO & Meta Tags** — Open Graph, Twitter Card, favicon, sitemap.xml, robots.txt |
 | 4.3 | 🔲 | **Analytics** — Integrar Vercel Analytics ou Google Analytics para métricas de uso |
-| 4.4 | 🔲 | **Páginas legais** — Termos de Uso, Política de Privacidade (obrigatórios para SaaS e lojas) |
+| 4.4 | ✅ | **Páginas legais** — Termos de Uso, Política de Privacidade (obrigatórios para SaaS e lojas) |
 | 4.5 | 🔲 | **Testes E2E** — Fluxo completo: capturar → converter → download → login → histórico → upgrade |
 | 4.6 | 🔲 | **Deploy Vercel** — Conectar repo GitHub, configurar variáveis de ambiente, deploy em `pdffull.vercel.app` |
-| 4.7 | 🔲 | **Reset mensal (CRON)** — Job agendado (Vercel Cron ou Supabase pg_cron) para resetar `conversions_this_month` todo dia 1 |
+| 4.7 | ✅ | **Reset mensal (CRON)** — Job agendado (Vercel Cron ou Supabase pg_cron) para resetar `conversions_this_month` todo dia 1 |
 
 ---
 

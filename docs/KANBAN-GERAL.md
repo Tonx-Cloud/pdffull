@@ -34,9 +34,9 @@
 | **FASE 6** | 8 | ✅ | Compartilhar, Excluir, IA & Emails |
 | **FASE 7** | 7 | ✅ | Bugfixes, Storage, FAQ & Docs |
 | **FASE 8** | 5 | ✅ | Bugfixes Produção (Upload, Share, Email) |
-| **FASE 9** | 6 | 🔄 | Freemium sem Login + PWA + Rename |
-| **FASE 10** | 5 | 🔲 | OCR, Edição Inteligente & Leitor PDF |
-| **TOTAL** | **81** | 🔄 | Do setup ao lançamento |
+| **FASE 9** | 6 | ✅ | Freemium sem Login + PWA + Rename |
+| **FASE 10** | 5 | ✅ | OCR, Edição Inteligente & Leitor PDF |
+| **TOTAL** | **81** | ✅ | Do setup ao lançamento |
 
 ---
 
@@ -240,12 +240,12 @@
 
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
-| 9.1 | 🔄 | **Converter sem login** — Remover `/converter` das rotas protegidas no middleware. Modo anônimo: conversão local sem upload. Limite via localStorage (2/mês). Logado: fluxo normal com upload |
-| 9.2 | 🔲 | **CTA "Cadastre grátis"** — Após conversão anônima, exibir banner "Crie conta grátis e ganhe +3 conversões". Após limite anônimo esgotado, modal convida cadastro |
-| 9.3 | 🔲 | **Botão "Instalar App"** — Componente `PwaInstallButton` usando `beforeinstallprompt`. Exibido na landing, converter e dashboard header |
-| 9.4 | 🔲 | **Botão "Compartilhar App"** — Componente `PwaShareButton` usando `navigator.share`. Compartilha URL + descrição do PDFfULL |
-| 9.5 | 🔲 | **Renomear PDF** — Input editável no PdfResult (antes do upload) + botão rename no histórico com PATCH na API |
-| 9.6 | 🔲 | **Atualizar landing page** — Corrigir texto "Sem cadastro necessário" → "2 conversões sem cadastro", adicionar botões PWA |
+| 9.1 | ✅ | **Converter sem login** — Remover `/converter` das rotas protegidas no middleware. Modo anônimo: conversão local sem upload. Limite via localStorage (2/mês). Logado: fluxo normal com upload |
+| 9.2 | ✅ | **CTA "Cadastre grátis"** — Após conversão anônima, exibir banner "Crie conta grátis e ganhe +3 conversões". Após limite anônimo esgotado, modal convida cadastro |
+| 9.3 | ✅ | **Botão "Instalar App"** — Componente `PwaInstallButton` usando `beforeinstallprompt`. Exibido na landing, converter e dashboard header |
+| 9.4 | ✅ | **Botão "Compartilhar App"** — Componente `PwaShareButton` usando `navigator.share`. Compartilha URL + descrição do PDFfULL |
+| 9.5 | ✅ | **Renomear PDF** — Input editável no PdfResult (antes do upload) + botão rename no histórico com PATCH na API |
+| 9.6 | ✅ | **Atualizar landing page** — Corrigir texto "Sem cadastro necessário" → "2 conversões sem cadastro", adicionar botões PWA |
 
 ---
 
@@ -257,11 +257,11 @@
 
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
-| 10.1 | 🔲 | **OCR via Gemini** — Endpoint `/api/ocr` recebe imagem e retorna texto extraído via Gemini 2.0 Flash. Botão "Extrair Texto" no converter |
-| 10.2 | 🔲 | **Editor Markdown** — Modal com textarea para editar texto extraído do OCR. Preview lado a lado com formatação |
-| 10.3 | 🔲 | **Markdown → PDF** — Converter texto Markdown editado para PDF formatado usando html2pdf ou jsPDF com estilos |
-| 10.4 | 🔲 | **Integrar no Modal IA** — Unificar OCR, edição e análise no modal de IA. Abas: "Análise" / "Extrair Texto" / "Editar" |
-| 10.5 | 🔲 | **Leitor PDF integrado** — Componente viewer usando pdf.js para abrir PDFs dentro do app. Botão "Abrir PDF" no histórico |
+| 10.1 | ✅ | **OCR via Gemini** — Endpoint `/api/ocr` recebe imagem e retorna texto extraído via Gemini 2.0 Flash. Botão "Extrair Texto" no converter |
+| 10.2 | ✅ | **Editor Markdown** — Modal com textarea para editar texto extraído do OCR. Preview lado a lado com formatação |
+| 10.3 | ✅ | **Markdown → PDF** — Converter texto Markdown editado para PDF formatado usando jsPDF com estilos |
+| 10.4 | ✅ | **Integrar no Modal IA** — Unificar OCR, edição e análise no modal de IA. Abas: "Análise" / "Extrair Texto" |
+| 10.5 | ✅ | **Leitor PDF integrado** — Componente viewer com iframe para abrir PDFs dentro do app. Botão "Visualizar PDF" no histórico e no resultado |
 
 ---
 

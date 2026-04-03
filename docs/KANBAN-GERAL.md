@@ -38,7 +38,8 @@
 | **FASE 10** | 5 | ✅ | OCR, Edição Inteligente & Leitor PDF |
 | **FASE 11** | 7 | ✅ | UX Bugs, Merge PDFs, Hamburger, i18n |
 | **FASE 12** | 4 | ✅ | Domínio Customizado (pdf-full.com) |
-| **TOTAL** | **92** | ✅ | Do setup ao lançamento |
+| **FASE 13** | 3 | ✅ | Testes E2E Produção (Playwright) |
+| **TOTAL** | **95** | ✅ | Do setup ao lançamento |
 
 ---
 
@@ -296,7 +297,21 @@
 | 12.1 | ✅ | **Registro do domínio** — PDF-FULL.COM registrado via Cloudflare Registrar. NS: rick.ns.cloudflare.com + veda.ns.cloudflare.com |
 | 12.2 | ✅ | **Atualizar URLs no código** — Substituir todas as referências `pdffull.vercel.app` → `www.pdf-full.com` em layout, sitemap, robots, emails, FAQ, termos, TWA |
 | 12.3 | ✅ | **Atualizar documentação** — Kanban, FAQ, Guia TWA, Visão Geral atualizados para novo domínio |
-| 12.4 | 🔲 | **Configurar Vercel + Cloudflare DNS** — Adicionar `pdf-full.com` e `www.pdf-full.com` como domínios customizados no Vercel. Configurar CNAME no Cloudflare |
+| 12.4 | ✅ | **Configurar Vercel + Cloudflare DNS** — Domínios `pdf-full.com` e `www.pdf-full.com` adicionados ao Vercel. A record `@ → 76.76.21.21`, CNAME `www → cname.vercel-dns.com` no Cloudflare. SSL ativo. |
+
+---
+
+## FASE 13 — Testes E2E Produção (Playwright)
+
+> **Objetivo:** Suite E2E completa contra produção www.pdf-full.com
+> **Pré-requisito:** Fase 12 concluída (domínio ativo)
+> **Entrega:** 50 testes verdes cobrindo todos os fluxos do usuário
+
+| # | Tarefa | Detalhes | Status |
+|---|--------|----------|:------:|
+| 13.1 | ✅ | **Suite E2E produção** — 50 testes em `tests/production-e2e.spec.ts` cobrindo: Landing (hero, header, features, planos, footer, i18n selector), Login (form, OAuth, magic link, links), Register (checkbox termos, habilitação botões, links), Converter anônimo, Rotas protegidas (redirect /login), FAQ (seções, accordions), Sobre, Termos, Privacidade (LGPD), Fluxos multi-page, Domínio/SSL/headers, Mobile hamburger |
+| 13.2 | ✅ | **Config produção Playwright** — `playwright.production.config.ts` sem webServer, baseURL `https://www.pdf-full.com`, 3 workers, retry 1 |
+| 13.3 | ✅ | **Resultado: 50/50 passed** — 16.2s, zero flaky, cobertura: 13 describe blocks, 12 páginas/fluxos testados |
 
 ---
 

@@ -6,7 +6,7 @@
 - **Título:** PDFfULL — Foto em PDF
 - **Categoria:** Produtividade
 - **Classificação de conteúdo:** Livre
-- **Site:** https://pdffull.vercel.app
+- **Site:** https://www.pdf-full.com
 - **E-mail de contato:** hiltonsf@gmail.com
 
 ---

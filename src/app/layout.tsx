@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   description:
     "Tire uma foto e converta em PDF otimizado em um clique. Grátis, rápido e direto do celular.",
   manifest: "/manifest.json",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://pdffull.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://www.pdf-full.com"),
   openGraph: {
     title: "PDFfULL — Foto em PDF. Um clique.",
     description:

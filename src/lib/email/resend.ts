@@ -48,19 +48,19 @@ export async function sendWelcomeEmail(to: string, name: string) {
           <li>Análise com IA (Gemini)</li>
         </ul>
       </div>
-      <a href="https://pdffull.vercel.app/converter"
+      <a href="https://www.pdf-full.com/converter"
          style="display: block; background: #2563eb; color: #fff; text-decoration: none; text-align: center; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 16px;">
         Fazer minha primeira conversão →
       </a>
       <p style="color: #94a3b8; font-size: 12px; margin: 16px 0 0; text-align: center;">
-        Quer conversões ilimitadas? <a href="https://pdffull.vercel.app/conta" style="color: #2563eb;">Conheça o plano Pro</a> por R$ 9,90/mês.
+        Quer conversões ilimitadas? <a href="https://www.pdf-full.com/conta" style="color: #2563eb;">Conheça o plano Pro</a> por R$ 9,90/mês.
       </p>
     </div>
     <div style="border-top: 1px solid #e2e8f0; padding: 16px; text-align: center;">
       <p style="color: #94a3b8; font-size: 12px; margin: 0;">
         © ${new Date().getFullYear()} PDFfULL — 
-        <a href="https://pdffull.vercel.app/termos" style="color: #94a3b8;">Termos</a> • 
-        <a href="https://pdffull.vercel.app/privacidade" style="color: #94a3b8;">Privacidade</a>
+        <a href="https://www.pdf-full.com/termos" style="color: #94a3b8;">Termos</a> • 
+        <a href="https://www.pdf-full.com/privacidade" style="color: #94a3b8;">Privacidade</a>
       </p>
     </div>
   </div>
@@ -101,7 +101,7 @@ export async function sendUpgradeEmail(to: string, name: string) {
         <li>PDFs salvos no Cloudflare R2</li>
         <li>Suporte prioritário</li>
       </ul>
-      <a href="https://pdffull.vercel.app/converter"
+      <a href="https://www.pdf-full.com/converter"
          style="display: block; background: #7c3aed; color: #fff; text-decoration: none; text-align: center; padding: 12px 24px; border-radius: 8px; font-weight: 600;">
         Converter agora →
       </a>

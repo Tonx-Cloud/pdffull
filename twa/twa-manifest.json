@@ -1,6 +1,6 @@
 {
   "packageId": "app.vercel.pdffull.twa",
-  "host": "pdffull.vercel.app",
+  "host": "www.pdf-full.com",
   "name": "PDFfULL",
   "launcherName": "PDFfULL",
   "display": "standalone",
@@ -13,8 +13,8 @@
   "backgroundColor": "#FFFFFF",
   "enableNotifications": false,
   "startUrl": "/",
-  "iconUrl": "https://pdffull.vercel.app/icons/icon-512x512.png",
-  "maskableIconUrl": "https://pdffull.vercel.app/icons/icon-512-maskable.png",
+  "iconUrl": "https://www.pdf-full.com/icons/icon-512x512.png",
+  "maskableIconUrl": "https://www.pdf-full.com/icons/icon-512-maskable.png",
   "monochromeIconUrl": "",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
@@ -25,7 +25,7 @@
   "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://pdffull.vercel.app/manifest.json",
+  "webManifestUrl": "https://www.pdf-full.com/manifest.json",
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": {

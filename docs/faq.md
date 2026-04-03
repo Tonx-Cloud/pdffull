@@ -1,7 +1,7 @@
 # 📖 FAQ — PDFfULL
 
 > Guia completo de uso, funcionalidades e políticas do PDFfULL.  
-> **URL:** https://pdffull.vercel.app/faq
+> **URL:** https://www.pdf-full.com/faq
 
 ---
 
@@ -19,7 +19,7 @@ O PDFfULL é um aplicativo web progressivo (PWA) que converte fotos em PDFs otim
 
 ### Como usar (passo a passo)
 
-1. **Acesse** https://pdffull.vercel.app
+1. **Acesse** https://www.pdf-full.com
 2. **Faça login** com Google ou email (link mágico)
 3. **Aceite os Termos** de Uso na primeira vez
 4. Vá para **Converter**
@@ -37,13 +37,13 @@ O PDFfULL é um aplicativo web progressivo (PWA) que converte fotos em PDFs otim
 ### Como instalar no celular
 
 **Android (Chrome):**
-1. Acesse pdffull.vercel.app
+1. Acesse www.pdf-full.com
 2. Toque no menu (⋮) no canto superior direito
 3. Selecione "Adicionar à tela inicial"
 4. Confirme — o ícone do PDFfULL aparecerá como um app
 
 **iOS (Safari):**
-1. Acesse pdffull.vercel.app
+1. Acesse www.pdf-full.com
 2. Toque no botão compartilhar (↗)
 3. Selecione "Adicionar à Tela de Início"
 4. Confirme — o ícone aparecerá como um app nativo
@@ -177,8 +177,8 @@ O PDFfULL cumpre integralmente a **Lei Geral de Proteção de Dados** (Lei 13.70
 - **Exclusão**: Você pode excluir seus PDFs a qualquer momento
 - **DPO**: Contato disponível na Política de Privacidade
 
-> 📄 Política de Privacidade completa: https://pdffull.vercel.app/privacidade  
-> 📄 Termos de Uso: https://pdffull.vercel.app/termos
+> 📄 Política de Privacidade completa: https://www.pdf-full.com/privacidade  
+> 📄 Termos de Uso: https://www.pdf-full.com/termos
 
 ---
 
@@ -233,11 +233,11 @@ O PDFfULL cumpre integralmente a **Lei Geral de Proteção de Dados** (Lei 13.70
 
 ## 📞 Contato
 
-- **Site:** https://pdffull.vercel.app
-- **Sobre:** https://pdffull.vercel.app/sobre
-- **Privacidade:** https://pdffull.vercel.app/privacidade
-- **Termos:** https://pdffull.vercel.app/termos
-- **FAQ:** https://pdffull.vercel.app/faq
+- **Site:** https://www.pdf-full.com
+- **Sobre:** https://www.pdf-full.com/sobre
+- **Privacidade:** https://www.pdf-full.com/privacidade
+- **Termos:** https://www.pdf-full.com/termos
+- **FAQ:** https://www.pdf-full.com/faq
 
 ---
 

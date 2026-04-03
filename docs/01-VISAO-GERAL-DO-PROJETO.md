@@ -3,7 +3,7 @@
 
 > **Criado:** 02/04/2026 | **Status:** Fase 0 — Setup Inicial  
 > **Stack:** Next.js 14 (App Router) + React + Tailwind CSS + Supabase + Cloudflare R2 + Mercado Pago  
-> **Deploy:** pdffull.vercel.app
+> **Deploy:** www.pdf-full.com (Vercel)
 
 ---
 
@@ -13,7 +13,7 @@ PWA (Progressive Web App) SaaS focado em **conversão instantânea de fotos em P
 
 | Frente | Objetivo | Status |
 |--------|----------|--------|
-| **PWA (pdffull.vercel.app)** | App completo com captura, conversão e compartilhamento | 🔲 Fase 0 |
+| **PWA (www.pdf-full.com)** | App completo com captura, conversão e compartilhamento | 🔲 Fase 0 |
 | **Landing Page** | Site comercial, captação de leads | 🔲 Fase 4 |
 | **App Android (Play Store)** | Publicação oficial via TWA | 🔲 Fase 5 |
 | **App iOS (App Store)** | Publicação via Capacitor | 🔲 Futuro |

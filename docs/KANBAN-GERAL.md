@@ -1,8 +1,8 @@
 # 📋 KANBAN GERAL — PDFfULL
 
 > **Criado:** 02/04/2026 | **Produto:** PDFfULL — Conversor Instantâneo de PDF  
-> **Stack:** Next.js 14 + React + Tailwind + Supabase + Cloudflare R2 + Mercado Pago  
-> **Deploy:** pdffull.vercel.app  
+> **Stack:** Next.js 16 + React 19 + Tailwind v4 + Supabase + Cloudflare R2 + Mercado Pago  
+> **Deploy:** www.pdf-full.com (Vercel) | Domínio: PDF-FULL.COM (Cloudflare)  
 > **Documentação:** `docs/01-VISAO-GERAL-DO-PROJETO.md`
 
 ---
@@ -36,7 +36,9 @@
 | **FASE 8** | 5 | ✅ | Bugfixes Produção (Upload, Share, Email) |
 | **FASE 9** | 6 | ✅ | Freemium sem Login + PWA + Rename |
 | **FASE 10** | 5 | ✅ | OCR, Edição Inteligente & Leitor PDF |
-| **TOTAL** | **81** | ✅ | Do setup ao lançamento |
+| **FASE 11** | 7 | ✅ | UX Bugs, Merge PDFs, Hamburger, i18n |
+| **FASE 12** | 4 | ✅ | Domínio Customizado (pdf-full.com) |
+| **TOTAL** | **92** | ✅ | Do setup ao lançamento |
 
 ---
 
@@ -118,7 +120,7 @@
 
 > **Objetivo:** Polir a experiência, criar landing page comercial e fazer deploy na Vercel  
 > **Pré-requisito:** Fases 0-3 concluídas  
-> **Entrega:** App publicado em pdffull.vercel.app com landing page e SEO
+> **Entrega:** App publicado em www.pdf-full.com com landing page e SEO
 
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
@@ -127,7 +129,7 @@
 | 4.3 | ✅ | **Analytics** — Integrar Vercel Analytics ou Google Analytics para métricas de uso |
 | 4.4 | ✅ | **Páginas legais** — Termos de Uso, Política de Privacidade (obrigatórios para SaaS e lojas) |
 | 4.5 | ✅ | **Testes E2E** — Playwright: 48 specs (landing, auth, converter, navegação, páginas legais, dashboard redirect) |
-| 4.6 | ✅ | **Deploy Vercel** — Conectar repo GitHub, configurar variáveis de ambiente, deploy em `pdffull.vercel.app` |
+| 4.6 | ✅ | **Deploy Vercel** — Conectar repo GitHub, configurar variáveis de ambiente, deploy em `www.pdf-full.com` |
 | 4.7 | ✅ | **Reset mensal (CRON)** — Job agendado (Vercel Cron ou Supabase pg_cron) para resetar `conversions_this_month` todo dia 1 |
 
 ---
@@ -262,6 +264,39 @@
 | 10.3 | ✅ | **Markdown → PDF** — Converter texto Markdown editado para PDF formatado usando jsPDF com estilos |
 | 10.4 | ✅ | **Integrar no Modal IA** — Unificar OCR, edição e análise no modal de IA. Abas: "Análise" / "Extrair Texto" |
 | 10.5 | ✅ | **Leitor PDF integrado** — Componente viewer com iframe para abrir PDFs dentro do app. Botão "Visualizar PDF" no histórico e no resultado |
+
+---
+
+## FASE 11 — UX Bugs, Merge PDFs, Hamburger Menu & i18n
+
+> **Objetivo:** Corrigir bugs de UX, adicionar merge de PDFs, menu responsivo e internacionalização  
+> **Pré-requisito:** Fase 10 concluída  
+> **Entrega:** Layout corrigido, merge funcional, hamburger menu, 6 idiomas com RTL
+
+| # | Tarefa | Detalhes | Status |
+|---|--------|----------|:------:|
+| 11.1 | ✅ | **Fix layout histórico** — Card agora usa 2 linhas: título em cima, botões embaixo. Corrige sobreposição de botões no mobile |
+| 11.2 | ✅ | **Juntar PDFs** — Botão "Merge" na ação em lote do histórico usando `pdf-lib` client-side. Selecionar N PDFs → 1 PDF unificado |
+| 11.3 | ✅ | **Fix PDF Viewer** — Reescrito com `useRef` para ciclo de vida de blob URLs. Fetch remoto como blob antes de exibir |
+| 11.4 | ✅ | **Performance** — Removido `force-dynamic` do layout. Imports dinâmicos (`dynamic()`) para modais pesados |
+| 11.5 | ✅ | **Hamburger menu** — Menu mobile colapsável com dropdown. Desktop mantém nav inline. Inclui LanguageSelector e PwaInstallButton |
+| 11.6 | ✅ | **i18n (next-intl)** — 6 idiomas (pt, en, es, zh, hi, ar) sem prefixo de URL. Detecção via cookie → Accept-Language → fallback pt |
+| 11.7 | ✅ | **RTL Support** — Suporte a direção right-to-left para árabe. `dir="rtl"` dinâmico no html |
+
+---
+
+## FASE 12 — Domínio Customizado (pdf-full.com)
+
+> **Objetivo:** Configurar domínio próprio PDF-FULL.COM registrado via Cloudflare  
+> **Pré-requisito:** Fase 11 concluída  
+> **Entrega:** App acessível em www.pdf-full.com com SSL, DNS e redirects configurados
+
+| # | Tarefa | Detalhes | Status |
+|---|--------|----------|:------:|
+| 12.1 | ✅ | **Registro do domínio** — PDF-FULL.COM registrado via Cloudflare Registrar. NS: rick.ns.cloudflare.com + veda.ns.cloudflare.com |
+| 12.2 | ✅ | **Atualizar URLs no código** — Substituir todas as referências `pdffull.vercel.app` → `www.pdf-full.com` em layout, sitemap, robots, emails, FAQ, termos, TWA |
+| 12.3 | ✅ | **Atualizar documentação** — Kanban, FAQ, Guia TWA, Visão Geral atualizados para novo domínio |
+| 12.4 | 🔲 | **Configurar Vercel + Cloudflare DNS** — Adicionar `pdf-full.com` e `www.pdf-full.com` como domínios customizados no Vercel. Configurar CNAME no Cloudflare |
 
 ---
 

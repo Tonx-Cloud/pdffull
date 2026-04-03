@@ -14,7 +14,7 @@ export default function TermosPage() {
 
       <p>
         Estes Termos de Uso (&quot;Termos&quot;) regulam o acesso e uso do <strong>PDFfULL</strong> (&quot;Serviço&quot;),
-        disponível em <a href="https://pdffull.vercel.app">pdffull.vercel.app</a>.
+        disponível em <a href="https://www.pdf-full.com">www.pdf-full.com</a>.
         Ao criar uma conta ou utilizar o Serviço, você declara que leu, compreendeu e concorda
         com estes Termos e com nossa{" "}
         <Link href="/privacidade" className="text-blue-600">Política de Privacidade</Link>.

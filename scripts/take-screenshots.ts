@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 
 const OUTPUT_DIR = path.join(__dirname, "..", "docs", "screenshots");
-const BASE_URL = "https://pdffull.vercel.app";
+const BASE_URL = "https://www.pdf-full.com";
 
 async function main() {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });

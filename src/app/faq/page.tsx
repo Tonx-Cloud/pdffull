@@ -40,7 +40,7 @@ const faqSections: { title: string; items: FaqItem[] }[] = [
       {
         question: "Como instalar o PDFfULL no celular?",
         answer:
-          'No Chrome (Android): acesse pdffull.vercel.app, toque no menu (⋮) e selecione "Adicionar à tela inicial". No Safari (iOS): toque no botão compartilhar e selecione "Adicionar à Tela de Início".',
+          'No Chrome (Android): acesse www.pdf-full.com, toque no menu (⋮) e selecione "Adicionar à tela inicial". No Safari (iOS): toque no botão compartilhar e selecione "Adicionar à Tela de Início".',
       },
       {
         question: "Preciso criar conta para usar?",

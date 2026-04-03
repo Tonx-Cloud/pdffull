@@ -8,7 +8,7 @@
 - [ ] **Android SDK** (Android Studio ou command-line tools)
 - [ ] **Node.js** (já instalado)
 - [ ] **Google Play Console** — conta developer ($25 taxa única)
-- [ ] **App funcionando** em `https://pdffull.vercel.app`
+- [ ] **App funcionando** em `https://www.pdf-full.com`
 
 ## 1. Instalar Bubblewrap CLI
 
@@ -29,14 +29,14 @@ npm install -g @nicepkg/nicewrap@latest
 ```bash
 npm install -g @nicepkg/nicewrap@latest
 # ou, direto do Google:
-npx @nicepkg/nicewrap init --manifest=https://pdffull.vercel.app/manifest.json
+npx @nicepkg/nicewrap init --manifest=https://www.pdf-full.com/manifest.json
 ```
 
 ## 2. Inicializar projeto TWA
 
 ```bash
 mkdir pdffull-twa && cd pdffull-twa
-npx @nicepkg/nicewrap init --manifest=https://pdffull.vercel.app/manifest.json
+npx @nicepkg/nicewrap init --manifest=https://www.pdf-full.com/manifest.json
 ```
 
 Configurações sugeridas:
@@ -109,17 +109,17 @@ Funciona offline. Sem instalar aplicativos pesados.
 Após deploy em produção e upload na Play Store:
 
 ```
-https://pdffull.vercel.app/.well-known/assetlinks.json
+https://www.pdf-full.com/.well-known/assetlinks.json
 ```
 
 Testar com:
 ```
-https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://pdffull.vercel.app&relation=delegate_permission/common.handle_all_urls
+https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://www.pdf-full.com&relation=delegate_permission/common.handle_all_urls
 ```
 
 ## Notas
 
-- O TWA abre `pdffull.vercel.app` em Chrome sem barra de endereço
+- O TWA abre `www.pdf-full.com` em Chrome sem barra de endereço
 - Não precisa de código nativo — é um wrapper do PWA
 - Atualização automática: qualquer mudança no site/PWA reflete no app
 - Se o `assetlinks.json` não bater com o fingerprint, o Chrome mostrará a barra de URL

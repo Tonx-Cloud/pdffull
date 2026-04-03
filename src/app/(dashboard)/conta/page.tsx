@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import type { Profile } from "@/types";
+import { ContaActions } from "@/components/conta-actions";
 
 export default async function ContaPage() {
   const supabase = await createClient();
@@ -88,14 +89,7 @@ export default async function ContaPage() {
           )}
         </div>
 
-        {plan === "free" && (
-          <a
-            href="/api/checkout"
-            className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition"
-          >
-            Fazer upgrade para Pro
-          </a>
-        )}
+        <ContaActions plan={plan} />
       </div>
 
       {/* Sair */}

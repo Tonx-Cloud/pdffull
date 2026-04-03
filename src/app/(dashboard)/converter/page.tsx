@@ -10,6 +10,7 @@ import { FileText, Loader2, AlertTriangle } from "lucide-react";
 import { compressImages } from "@/lib/pdf/compress";
 import { generatePdf, getPdfFilename } from "@/lib/pdf/generate";
 import { useConversionLimit } from "@/hooks/use-conversion-limit";
+import { UpgradeModal } from "@/components/upgrade-modal";
 import { toast } from "sonner";
 
 type Stage = "capture" | "processing" | "done";
@@ -21,6 +22,7 @@ export default function ConverterPage() {
   const [progressLabel, setProgressLabel] = useState("");
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [pdfFilename, setPdfFilename] = useState("");
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const limit = useConversionLimit();
 
   const handleCapture = useCallback((files: File[]) => {
@@ -51,7 +53,7 @@ export default function ConverterPage() {
     }
 
     if (!limit.canConvert) {
-      toast.error("Limite mensal atingido. Faça upgrade para o Pro.");
+      setShowUpgrade(true);
       return;
     }
 
@@ -163,9 +165,12 @@ export default function ConverterPage() {
             </span>
           </div>
           {!limit.canConvert && (
-            <a href="/conta" className="text-blue-600 hover:underline text-xs mt-1 inline-block">
+            <button
+              onClick={() => setShowUpgrade(true)}
+              className="text-blue-600 hover:underline text-xs mt-1 inline-block"
+            >
               Fazer upgrade para Pro →
-            </a>
+            </button>
           )}
         </div>
       )}
@@ -189,6 +194,8 @@ export default function ConverterPage() {
           {images.length === 1 ? "imagem" : "imagens"})
         </Button>
       )}
+
+      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} />
     </div>
   );
 }

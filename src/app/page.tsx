@@ -128,8 +128,16 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-white px-4 py-6 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} PDFfULL. Todos os direitos reservados.
+      <footer className="border-t bg-white px-4 py-6 text-center text-sm text-muted-foreground space-y-2">
+        <div className="flex justify-center gap-4">
+          <Link href="/termos" className="hover:text-blue-600 hover:underline">
+            Termos de Uso
+          </Link>
+          <Link href="/privacidade" className="hover:text-blue-600 hover:underline">
+            Privacidade
+          </Link>
+        </div>
+        <p>© {new Date().getFullYear()} PDFfULL. Todos os direitos reservados.</p>
       </footer>
     </div>
   );

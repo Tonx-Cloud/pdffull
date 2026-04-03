@@ -12,6 +12,7 @@ import { generatePdf, getPdfFilename } from "@/lib/pdf/generate";
 import { useConversionLimit } from "@/hooks/use-conversion-limit";
 import { UpgradeModal } from "@/components/upgrade-modal";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
 
 type Stage = "capture" | "processing" | "done";
 
@@ -75,19 +76,61 @@ export default function ConverterPage() {
 
       const filename = getPdfFilename(images[0]?.name);
 
-      // Etapa 3: Upload para nuvem
+      // Etapa 3: Upload direto ao Supabase Storage via signed URL
+      // (evita limite de 4.5MB do body nas serverless functions)
       setProgressLabel("Salvando na nuvem...");
+      setProgress(80);
+
+      // 3a. Obter signed upload URL do servidor
+      const signedRes = await fetch("/api/upload/signed-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename }),
+      });
+
+      if (!signedRes.ok) {
+        const signedData = await signedRes.json().catch(() => ({}));
+        throw new Error(signedData.error || "Erro ao preparar upload");
+      }
+
+      const { signedUrl, token, storageKey, filename: sanitizedName } =
+        await signedRes.json();
+
+      // 3b. Upload do PDF direto ao Storage (sem passar pelo serverless)
       setProgress(85);
+      const supabase = createClient();
+      const { error: uploadError } = await supabase.storage
+        .from("pdfs")
+        .uploadToSignedUrl(storageKey, token, blob, {
+          contentType: "application/pdf",
+        });
 
-      const formData = new FormData();
-      formData.append("file", blob, filename);
-      formData.append("filename", filename);
-      formData.append("pages", String(images.length));
+      if (uploadError) {
+        throw new Error("Erro ao salvar arquivo. Tente novamente.");
+      }
 
-      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      setProgress(92);
+
+      // 3c. Obter URL pública
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("pdfs").getPublicUrl(storageKey);
+
+      // 3d. Registrar conversão via API leve (sem enviar arquivo)
+      const res = await fetch("/api/conversions/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: sanitizedName,
+          pdf_url: publicUrl,
+          pages: images.length,
+          size_bytes: blob.size,
+        }),
+      });
+
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Erro no upload");
+        throw new Error(data.error || "Erro ao registrar conversão");
       }
 
       setProgress(100);

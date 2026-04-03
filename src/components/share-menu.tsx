@@ -29,7 +29,11 @@ export function ShareMenu({ pdfUrl, pdfBlob, filename, variant = "default" }: Sh
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  const shareText = `${filename} - Gerado com PDFfULL`;
+  // Sanitizar filename: remover caracteres especiais Unicode (◆, —, emojis, etc.)
+  const cleanFilename = filename
+    .replace(/[^\x20-\x7E\u00C0-\u00FF]/g, "")
+    .trim();
+  const shareText = `${cleanFilename} - Gerado com PDFfULL`;
   const shareUrl = pdfUrl && !pdfUrl.startsWith("local://") ? pdfUrl : "";
 
   const handleNativeShare = async () => {
@@ -55,19 +59,16 @@ export function ShareMenu({ pdfUrl, pdfBlob, filename, variant = "default" }: Sh
   };
 
   const handleEmail = () => {
-    const subject = encodeURIComponent(`PDF: ${filename}`);
+    const subject = encodeURIComponent(`PDF: ${cleanFilename}`);
     const body = encodeURIComponent(shareUrl ? `${shareText}\n\n${shareUrl}` : shareText);
-    const a = document.createElement("a");
-    a.href = `mailto:?subject=${subject}&body=${body}`;
-    a.click();
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
     setOpen(false);
   };
 
   const handleSMS = () => {
     const text = shareUrl ? `${shareText} ${shareUrl}` : shareText;
-    const a = document.createElement("a");
-    a.href = `sms:?body=${encodeURIComponent(text)}`;
-    a.click();
+    window.open(`sms:?body=${encodeURIComponent(text)}`, "_self");
+    setOpen(false);
     setOpen(false);
   };
 

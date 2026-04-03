@@ -28,8 +28,9 @@
 | **FASE 2** | 7 | ✅ | Auth & SaaS (Usuários & Limites) |
 | **FASE 3** | 6 | ✅ | Monetização (Mercado Pago) |
 | **FASE 4** | 7 | ✅ | Polish, Landing & Deploy |
+| **FASE 4.8** | 3 | 🔄 | Infra Produção (Supabase, Icons, OAuth) |
 | **FASE 5** | 5 | 🔲 | Publicação nas Lojas |
-| **TOTAL** | **41** | 🔲 | Do setup ao lançamento |
+| **TOTAL** | **44** | 🔄 | Do setup ao lançamento |
 
 ---
 
@@ -125,6 +126,20 @@
 
 ---
 
+## FASE 4.8 — Infraestrutura de Produção
+
+> **Objetivo:** Corrigir erros de produção, configurar serviços externos  
+> **Pré-requisito:** Fase 4 concluída  
+> **Entrega:** App funcionando sem erros 404/400 em produção
+
+| # | Tarefa | Detalhes | Status |
+|---|--------|----------|:------:|
+| 4.8.1 | ✅ | **Migration SQL Supabase** — Rodar `001_initial_schema.sql` no banco remoto (pooler `aws-1-us-west-2`). Tabelas: `profiles`, `conversions`, `subscriptions` com RLS |
+| 4.8.2 | ✅ | **Ícones PWA & Favicon** — Gerar `icon-192x192.png`, `icon-512x512.png`, `icon-512-maskable.png` e `favicon.ico`. Corrigir manifest com purpose separado (`any` vs `maskable`) |
+| 4.8.3 | ⏸️ | **Google OAuth no Supabase** — Configurar provider Google no Dashboard do Supabase (requer Google Cloud OAuth Client ID/Secret). Habilitar Magic Link email |
+
+---
+
 ## FASE 5 — Publicação nas Lojas
 
 > **Objetivo:** Publicar o PWA como app nativo na Google Play Store  
@@ -134,8 +149,8 @@
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
 | 5.1 | 🔲 | **Configurar Bubblewrap** — Instalar CLI, gerar projeto TWA apontando para `pdffull.vercel.app` |
-| 5.2 | 🔲 | **Digital Asset Links** — Criar `/.well-known/assetlinks.json` na Vercel para validar o app TWA |
-| 5.3 | 🔲 | **Assets da loja** — Ícone 512x512, screenshots (celular + tablet), descrição curta/longa, feature graphic |
+| 5.2 | ✅ | **Digital Asset Links** — Criar `/.well-known/assetlinks.json` na Vercel para validar o app TWA |
+| 5.3 | 🔄 | **Assets da loja** — Ícone 512x512 ✅, screenshots (celular + tablet) 🔲, descrição curta/longa 🔲, feature graphic 🔲 |
 | 5.4 | 🔲 | **Upload Play Store** — Gerar `.aab`, criar listing no Google Play Console, enviar para revisão |
 | 5.5 | 🔲 | **iOS (futuro)** — Avaliar Capacitor para empacotamento iOS, criar conta Apple Developer ($99/ano) |
 

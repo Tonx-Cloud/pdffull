@@ -136,7 +136,7 @@
 |---|--------|----------|:------:|
 | 4.8.1 | ✅ | **Migration SQL Supabase** — Rodar `001_initial_schema.sql` no banco remoto (pooler `aws-1-us-west-2`). Tabelas: `profiles`, `conversions`, `subscriptions` com RLS |
 | 4.8.2 | ✅ | **Ícones PWA & Favicon** — Gerar `icon-192x192.png`, `icon-512x512.png`, `icon-512-maskable.png` e `favicon.ico`. Corrigir manifest com purpose separado (`any` vs `maskable`) |
-| 4.8.3 | ⏸️ | **Google OAuth no Supabase** — Configurar provider Google no Dashboard do Supabase (requer Google Cloud OAuth Client ID/Secret). Habilitar Magic Link email |
+| 4.8.3 | ✅ | **Google OAuth no Supabase** — Provider Google configurado via CLI (`config push`). Client ID/Secret do Google Cloud. Magic Link habilitado |
 
 ---
 

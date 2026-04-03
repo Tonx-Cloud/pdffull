@@ -33,7 +33,8 @@
 | **FASE 5** | 5 | � | Publicação nas Lojas |
 | **FASE 6** | 8 | ✅ | Compartilhar, Excluir, IA & Emails |
 | **FASE 7** | 7 | ✅ | Bugfixes, Storage, FAQ & Docs |
-| **TOTAL** | **65** | 🔄 | Do setup ao lançamento |
+| **FASE 8** | 5 | ✅ | Bugfixes Produção (Upload, Share, Email) |
+| **TOTAL** | **70** | 🔄 | Do setup ao lançamento |
 
 ---
 
@@ -213,6 +214,22 @@
 
 ---
 
+## FASE 8 — Bugfixes Produção (Upload, Share, Email)
+
+> **Objetivo:** Corrigir bugs reportados em produção: 413 no upload, caractere especial no WhatsApp, email abrindo página em branco  
+> **Pré-requisito:** Fase 7 concluída  
+> **Entrega:** Upload sem limite de 4.5MB, compartilhamento limpo, mailto funcional
+
+| # | Tarefa | Detalhes | Status |
+|---|--------|----------|:------:|
+| 8.1 | ✅ | **Fix 413 Content Too Large** — Upload via signed URL do Supabase Storage (bypassa limite 4.5MB serverless). Nova rota `/api/upload/signed-url` gera URL assinada, client faz upload direto. `/api/conversions/register` registra metadata sem enviar arquivo |
+| 8.2 | ✅ | **Fix WhatsApp caractere especial** — Sanitizar filename no shareText removendo caracteres Unicode problemáticos (◆, emojis, em-dash). Regex `[^\x20-\x7E\u00C0-\u00FF]` preserva ASCII + acentos pt-BR |
+| 8.3 | ✅ | **Fix Email blank page** — Substituir `<a>.click()` por `window.location.href` para mailto. SMS agora usa `window.open(_self)` para compatibilidade |
+| 8.4 | ✅ | **Compressão otimizada** — `maxSizeMB` de 1→0.8, threshold de 1MB→800KB, validação de formatos suportados com mensagem amigável |
+| 8.5 | ✅ | **RLS Storage policy** — Migration `005_storage_upload_policy.sql`: INSERT para authenticated + SELECT público no bucket `pdfs` |
+
+---
+
 ## Notas Técnicas
 
 ### Conversão Client-Side
@@ -241,4 +258,5 @@ O processamento de imagem → PDF acontece **inteiramente no navegador** do usu�
 - **Security headers**: X-Content-Type-Options nosniff, X-Frame-Options DENY, HSTS, Referrer-Policy, Permissions-Policy
 - **Tabela webhook_logs**: auditoria completa de todas as tentativas de webhook com IP, status e detalhes
 - Upload para R2 via API Route (server-side), nunca direto do client
+- **Upload via Signed URL** (Fase 8): PDFs são uploaded diretamente do client ao Supabase Storage via signed URL gerada pelo server (service_role), evitando o limite de 4.5MB do body das serverless functions da Vercel
 - **Fallback Supabase Storage**: Quando R2 não configurado, PDFs são salvos no Supabase Storage (bucket público `pdfs`, 1GB free tier) com URLs reais

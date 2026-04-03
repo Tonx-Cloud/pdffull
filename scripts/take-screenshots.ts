@@ -22,7 +22,7 @@ async function main() {
 
   // 1. Landing page (full)
   console.log("📸 01 - Landing page...");
-  await page.goto(BASE_URL, { waitUntil: "networkidle" });
+  await page.goto(BASE_URL, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(1000);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "01-landing.png"),
@@ -36,7 +36,7 @@ async function main() {
 
   // 3. Register
   console.log("📸 03 - Register...");
-  await page.goto(`${BASE_URL}/register`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE_URL}/register`, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(500);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "03-register.png"),
@@ -44,7 +44,7 @@ async function main() {
 
   // 4. Login
   console.log("📸 04 - Login...");
-  await page.goto(`${BASE_URL}/login`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE_URL}/login`, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(500);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "04-login.png"),
@@ -52,7 +52,7 @@ async function main() {
 
   // 5. Sobre
   console.log("📸 05 - Sobre...");
-  await page.goto(`${BASE_URL}/sobre`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE_URL}/sobre`, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(500);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "05-sobre.png"),
@@ -61,7 +61,7 @@ async function main() {
 
   // 6. Termos
   console.log("📸 06 - Termos...");
-  await page.goto(`${BASE_URL}/termos`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE_URL}/termos`, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(500);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "06-termos.png"),
@@ -70,7 +70,7 @@ async function main() {
 
   // 7. Privacidade
   console.log("📸 07 - Privacidade...");
-  await page.goto(`${BASE_URL}/privacidade`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE_URL}/privacidade`, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(500);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "07-privacidade.png"),
@@ -79,7 +79,7 @@ async function main() {
 
   // 8. FAQ
   console.log("📸 08 - FAQ...");
-  await page.goto(`${BASE_URL}/faq`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE_URL}/faq`, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(500);
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "08-faq.png"),
@@ -95,7 +95,7 @@ async function main() {
 
   // 9. Landing desktop
   console.log("📸 09 - Landing desktop...");
-  await desktopPage.goto(BASE_URL, { waitUntil: "networkidle" });
+  await desktopPage.goto(BASE_URL, { waitUntil: "load", timeout: 60000 });
   await desktopPage.waitForTimeout(500);
   await desktopPage.screenshot({
     path: path.join(OUTPUT_DIR, "09-landing-desktop.png"),
@@ -104,7 +104,7 @@ async function main() {
 
   // 10. FAQ desktop
   console.log("📸 10 - FAQ desktop...");
-  await desktopPage.goto(`${BASE_URL}/faq`, { waitUntil: "networkidle" });
+  await desktopPage.goto(`${BASE_URL}/faq`, { waitUntil: "load", timeout: 60000 });
   await desktopPage.waitForTimeout(500);
   await desktopPage.screenshot({
     path: path.join(OUTPUT_DIR, "10-faq-desktop.png"),

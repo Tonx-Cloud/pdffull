@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { ConversionLimit } from "@/types";
 
 const FREE_LIMIT = 5;
+const POLL_INTERVAL = 30_000; // 30 segundos
 
 export function useConversionLimit(): ConversionLimit & { loading: boolean; refresh: () => void } {
   const [state, setState] = useState<ConversionLimit & { loading: boolean }>({
@@ -15,7 +16,7 @@ export function useConversionLimit(): ConversionLimit & { loading: boolean; refr
     loading: true,
   });
 
-  const fetch = async () => {
+  const fetchLimit = useCallback(async () => {
     const supabase = createClient();
     const {
       data: { user },
@@ -49,11 +50,25 @@ export function useConversionLimit(): ConversionLimit & { loading: boolean; refr
     const canConvert = plan === "pro" || used < FREE_LIMIT;
 
     setState({ used, max, canConvert, plan, loading: false });
-  };
-
-  useEffect(() => {
-    fetch();
   }, []);
 
-  return { ...state, refresh: fetch };
+  useEffect(() => {
+    fetchLimit();
+
+    // Polling a cada 30s para manter sincronizado entre dispositivos
+    const interval = setInterval(fetchLimit, POLL_INTERVAL);
+
+    // Refetch quando a aba ganha foco (ex: voltou do celular para o PC)
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchLimit();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [fetchLimit]);
+
+  return { ...state, refresh: fetchLimit };
 }

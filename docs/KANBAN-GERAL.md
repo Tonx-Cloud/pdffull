@@ -32,7 +32,8 @@
 | **FASE 4.9** | 6 | ✅ | Hardening de Segurança |
 | **FASE 5** | 5 | 🔲 | Publicação nas Lojas |
 | **FASE 6** | 8 | ✅ | Compartilhar, Excluir, IA & Emails |
-| **TOTAL** | **58** | 🔄 | Do setup ao lançamento |
+| **FASE 7** | 7 | ✅ | Bugfixes, Storage, FAQ & Docs |
+| **TOTAL** | **65** | 🔄 | Do setup ao lançamento |
 
 ---
 
@@ -194,6 +195,24 @@
 
 ---
 
+## FASE 7 — Bugfixes, Storage, FAQ & Documentação
+
+> **Objetivo:** Corrigir bugs de produção, adicionar storage fallback, criar FAQ e documentação  
+> **Pré-requisito:** Fase 6 concluída  
+> **Entrega:** Bugs corrigidos, PDFs na nuvem (Supabase Storage), FAQ completo, tutorial com prints
+
+| # | Tarefa | Detalhes | Status |
+|---|--------|----------|:------:|
+| 7.1 | ✅ | **Fix Card overflow** — Card do shadcn v4 tinha `overflow-hidden` cortando dropdown de compartilhamento. Adicionado `overflow-visible` no Card do pdf-result |
+| 7.2 | ✅ | **Fix Análise IA** — Modelo corrigido para `gemini-2.0-flash`, API key com `.trim()`, URL lazy-loaded, base64 chunked (8KB chunks), limite 10MB |
+| 7.3 | ✅ | **Fix Share** — Emoji removido (garbled no WhatsApp), `mailto:` e `sms:` agora usam `<a>.click()` em vez de `window.open` |
+| 7.4 | ✅ | **Polling de créditos** — Hook `useConversionLimit` agora faz polling a cada 30s + refetch no foco da aba (visibilitychange) |
+| 7.5 | ✅ | **Supabase Storage fallback** — Quando R2 não está configurado, PDFs são salvos no Supabase Storage (bucket público `pdfs`). URLs reais permitem download e análise IA no histórico |
+| 7.6 | ✅ | **Página FAQ** — `/faq` com 5 seções accordion (Uso Geral, Planos, Funcionalidades, Privacidade, Problemas). Link no footer da landing |
+| 7.7 | ✅ | **Documentação FAQ** — `docs/faq.md` completo com uso, planos, IA, compartilhamento, segurança, LGPD, stack e problemas comuns |
+
+---
+
 ## Notas Técnicas
 
 ### Conversão Client-Side
@@ -210,6 +229,7 @@ O processamento de imagem → PDF acontece **inteiramente no navegador** do usu�
 - Incrementado a cada conversão bem-sucedida
 - Reset automático via CRON no dia 1 de cada mês
 - Sem login = sem contagem (mas também sem histórico/upload)
+- **Polling a cada 30s** + refetch no foco da aba para sincronização entre dispositivos
 
 ### Segurança (Fase 4.9 — Hardening)
 - Chaves privadas (`SUPABASE_SERVICE_ROLE_KEY`, `MP_ACCESS_TOKEN`, `R2_SECRET_ACCESS_KEY`) **nunca** expostas no client
@@ -221,3 +241,4 @@ O processamento de imagem → PDF acontece **inteiramente no navegador** do usu�
 - **Security headers**: X-Content-Type-Options nosniff, X-Frame-Options DENY, HSTS, Referrer-Policy, Permissions-Policy
 - **Tabela webhook_logs**: auditoria completa de todas as tentativas de webhook com IP, status e detalhes
 - Upload para R2 via API Route (server-side), nunca direto do client
+- **Fallback Supabase Storage**: Quando R2 não configurado, PDFs são salvos no Supabase Storage (bucket público `pdfs`, 1GB free tier) com URLs reais

@@ -133,6 +133,9 @@ export default function Home() {
           <Link href="/sobre" className="hover:text-blue-600 hover:underline">
             Sobre Nós
           </Link>
+          <Link href="/faq" className="hover:text-blue-600 hover:underline">
+            FAQ
+          </Link>
           <Link href="/termos" className="hover:text-blue-600 hover:underline">
             Termos de Uso
           </Link>

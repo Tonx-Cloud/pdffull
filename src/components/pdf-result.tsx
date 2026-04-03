@@ -37,7 +37,7 @@ export function PdfResult({
   };
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md overflow-visible">
       <CardContent className="flex flex-col items-center gap-4 pt-6">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
           <svg

@@ -30,30 +30,48 @@ export async function DELETE(
     return NextResponse.json({ error: "Não autorizado" }, { status: 403 });
   }
 
-  // Deletar do R2 se tiver URL real
+  // Deletar do storage se tiver URL real
   if (conversion.pdf_url && !conversion.pdf_url.startsWith("local://")) {
-    try {
-      const { DeleteObjectCommand, S3Client } = await import("@aws-sdk/client-s3");
-      const r2 = new S3Client({
-        region: "auto",
-        endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-        credentials: {
-          accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
-        },
-      });
-      // Extrair key da URL
-      const url = new URL(conversion.pdf_url);
-      const key = url.pathname.replace(/^\//, "");
-      await r2.send(
-        new DeleteObjectCommand({
-          Bucket: process.env.R2_BUCKET_NAME || "pdffull-uploads",
-          Key: key,
-        })
-      );
-    } catch (e) {
-      console.error("Erro ao deletar do R2:", e);
-      // Continua para deletar do banco mesmo se R2 falhar
+    const pdfUrl = conversion.pdf_url;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+
+    if (pdfUrl.includes(supabaseUrl) && pdfUrl.includes("/storage/v1/object/public/pdfs/")) {
+      // Supabase Storage — extrair path e deletar
+      try {
+        const { createClient: createAdmin } = await import("@supabase/supabase-js");
+        const admin = createAdmin(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+        const path = pdfUrl.split("/storage/v1/object/public/pdfs/")[1];
+        if (path) {
+          await admin.storage.from("pdfs").remove([path]);
+        }
+      } catch (e) {
+        console.error("Erro ao deletar do Supabase Storage:", e);
+      }
+    } else {
+      // R2 — delete via S3
+      try {
+        const { DeleteObjectCommand, S3Client } = await import("@aws-sdk/client-s3");
+        if (process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID) {
+          const r2 = new S3Client({
+            region: "auto",
+            endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+            credentials: {
+              accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+              secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+            },
+          });
+          const url = new URL(pdfUrl);
+          const key = url.pathname.replace(/^\//, "");
+          await r2.send(
+            new DeleteObjectCommand({
+              Bucket: process.env.R2_BUCKET_NAME || "pdffull-uploads",
+              Key: key,
+            })
+          );
+        }
+      } catch (e) {
+        console.error("Erro ao deletar do R2:", e);
+      }
     }
   }
 

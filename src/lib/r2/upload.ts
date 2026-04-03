@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { createClient } from "@supabase/supabase-js";
 
 const isR2Configured =
   process.env.R2_ACCOUNT_ID &&
@@ -16,6 +17,13 @@ const r2Client = isR2Configured
     })
   : null;
 
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
 export async function uploadToR2(
   file: Buffer,
   filename: string,
@@ -23,19 +31,37 @@ export async function uploadToR2(
 ): Promise<string> {
   const key = `pdfs/${Date.now()}-${filename}`;
 
-  if (!r2Client) {
-    // R2 não configurado — retornar placeholder
-    return `local://${key}`;
+  if (r2Client) {
+    await r2Client.send(
+      new PutObjectCommand({
+        Bucket: process.env.R2_BUCKET_NAME!,
+        Key: key,
+        Body: file,
+        ContentType: contentType,
+      })
+    );
+    return `${process.env.R2_PUBLIC_URL}/${key}`;
   }
 
-  await r2Client.send(
-    new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME!,
-      Key: key,
-      Body: file,
-      ContentType: contentType,
-    })
-  );
+  // Fallback: Supabase Storage
+  try {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.storage
+      .from("pdfs")
+      .upload(key, file, { contentType, upsert: false });
 
-  return `${process.env.R2_PUBLIC_URL}/${key}`;
+    if (error) {
+      console.error("Supabase Storage upload error:", error);
+      return `local://${key}`;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("pdfs")
+      .getPublicUrl(key);
+
+    return publicUrl;
+  } catch (e) {
+    console.error("Storage fallback error:", e);
+    return `local://${key}`;
+  }
 }

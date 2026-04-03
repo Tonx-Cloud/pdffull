@@ -10,8 +10,7 @@ export async function GET() {
         namespace: "android_app",
         package_name: "app.vercel.pdffull.twa",
         sha256_cert_fingerprints: [
-          // TODO: Substituir pelo fingerprint real após gerar keystore
-          "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00",
+          "06:19:80:32:DA:27:F1:7B:97:3D:1A:F5:86:42:0B:A8:E0:80:89:C4:85:0A:E7:0E:74:1F:BE:A8:98:85:38:8D",
         ],
       },
     },

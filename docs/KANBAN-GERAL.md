@@ -30,7 +30,7 @@
 | **FASE 4** | 7 | ✅ | Polish, Landing & Deploy |
 | **FASE 4.8** | 3 | ✅ | Infra Produção (Supabase, Icons, OAuth) |
 | **FASE 4.9** | 6 | ✅ | Hardening de Segurança |
-| **FASE 5** | 5 | 🔲 | Publicação nas Lojas |
+| **FASE 5** | 5 | � | Publicação nas Lojas |
 | **FASE 6** | 8 | ✅ | Compartilhar, Excluir, IA & Emails |
 | **FASE 7** | 7 | ✅ | Bugfixes, Storage, FAQ & Docs |
 | **TOTAL** | **65** | 🔄 | Do setup ao lançamento |
@@ -168,10 +168,10 @@
 
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
-| 5.1 | 🔲 | **Configurar Bubblewrap** — Instalar CLI, gerar projeto TWA apontando para `pdffull.vercel.app` |
-| 5.2 | ✅ | **Digital Asset Links** — Criar `/.well-known/assetlinks.json` na Vercel para validar o app TWA |
-| 5.3 | 🔄 | **Assets da loja** — Ícone 512x512 ✅, screenshots (celular + tablet) 🔲, descrição curta/longa 🔲, feature graphic 🔲 |
-| 5.4 | 🔲 | **Upload Play Store** — Gerar `.aab`, criar listing no Google Play Console, enviar para revisão |
+| 5.1 | ✅ | **Configurar Bubblewrap** — CLI instalado, projeto TWA inicializado, keystore gerado (SHA-256: `06:19:80:32:DA:...`), assetlinks.json atualizado com fingerprint real |
+| 5.2 | ✅ | **Digital Asset Links** — `/.well-known/assetlinks.json` configurado com fingerprint real do keystore |
+| 5.3 | ✅ | **Assets da loja** — Ícone 512x512, 10 screenshots Playwright, feature graphic 1024x500, descrição curta/longa em `docs/play-store-listing.md` |
+| 5.4 | ✅ | **Build Android** — APK assinado (`dist/pdffull-1.0.0.apk`, 1MB) + AAB (`dist/pdffull-1.0.0.aab`, 1.1MB) gerados via Gradle. Pronto para upload na Play Console |
 | 5.5 | 🔲 | **iOS (futuro)** — Avaliar Capacitor para empacotamento iOS, criar conta Apple Developer ($99/ano) |
 
 ---

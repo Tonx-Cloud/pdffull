@@ -1,5 +1,5 @@
-const CACHE_NAME = "pdffull-v1";
-const STATIC_ASSETS = ["/", "/manifest.json"];
+const CACHE_NAME = "pdffull-v2";
+const STATIC_ASSETS = ["/manifest.json"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -20,33 +20,72 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  // Ignorar requisições de API e auth
+  const url = new URL(event.request.url);
+
+  // Ignorar requisições de API, auth e extensões do browser
   if (
-    event.request.url.includes("/api/") ||
-    event.request.url.includes("/auth/")
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/auth/") ||
+    url.protocol === "chrome-extension:"
   ) {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return (
-        cached ||
-        fetch(event.request).then((response) => {
-          // Cachear apenas GET requests com status 200
-          if (
-            event.request.method === "GET" &&
-            response.status === 200 &&
-            response.type === "basic"
-          ) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, clone);
-            });
-          }
+  // Navegação (páginas HTML) → Network-first com fallback cache
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, clone);
+          });
           return response;
         })
-      );
-    })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Assets estáticos (_next/static, imagens, fontes) → Cache-first
+  if (
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/icons/") ||
+    url.pathname.endsWith(".png") ||
+    url.pathname.endsWith(".ico") ||
+    url.pathname === "/manifest.json"
+  ) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        return (
+          cached ||
+          fetch(event.request).then((response) => {
+            if (response.status === 200) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, clone);
+              });
+            }
+            return response;
+          })
+        );
+      })
+    );
+    return;
+  }
+
+  // Tudo mais (_next/data, JS chunks dinâmicos) → Network-first
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        if (event.request.method === "GET" && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, clone);
+          });
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

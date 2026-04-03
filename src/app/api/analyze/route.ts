@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = "gemini-2.5-flash";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_MODEL = "gemini-2.0-flash";
+
+function getGeminiUrl(): string | null {
+  const key = process.env.GEMINI_API_KEY?.trim();
+  if (!key) return null;
+  return `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`;
+}
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -15,7 +19,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  if (!GEMINI_API_KEY) {
+  const geminiUrl = getGeminiUrl();
+  if (!geminiUrl) {
     return NextResponse.json(
       { error: "Serviço de IA não configurado" },
       { status: 503 }
@@ -105,7 +110,7 @@ Seja conciso mas informativo. Se o PDF contiver imagens de texto (scan/foto), te
   }
 
   try {
-    const geminiRes = await fetch(GEMINI_URL, {
+    const geminiRes = await fetch(geminiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -119,9 +124,9 @@ Seja conciso mas informativo. Se o PDF contiver imagens de texto (scan/foto), te
 
     if (!geminiRes.ok) {
       const err = await geminiRes.text();
-      console.error("Gemini API error:", err);
+      console.error("Gemini API error:", geminiRes.status, err);
       return NextResponse.json(
-        { error: "Erro ao analisar com IA" },
+        { error: `Erro ao analisar com IA (${geminiRes.status})` },
         { status: 502 }
       );
     }

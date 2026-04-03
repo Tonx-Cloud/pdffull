@@ -29,7 +29,7 @@ export function ShareMenu({ pdfUrl, pdfBlob, filename, variant = "default" }: Sh
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  const shareText = `📄 ${filename} — Gerado com PDFfULL`;
+  const shareText = `${filename} - Gerado com PDFfULL`;
   const shareUrl = pdfUrl && !pdfUrl.startsWith("local://") ? pdfUrl : "";
 
   const handleNativeShare = async () => {
@@ -57,13 +57,17 @@ export function ShareMenu({ pdfUrl, pdfBlob, filename, variant = "default" }: Sh
   const handleEmail = () => {
     const subject = encodeURIComponent(`PDF: ${filename}`);
     const body = encodeURIComponent(shareUrl ? `${shareText}\n\n${shareUrl}` : shareText);
-    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
+    const a = document.createElement("a");
+    a.href = `mailto:?subject=${subject}&body=${body}`;
+    a.click();
     setOpen(false);
   };
 
   const handleSMS = () => {
     const text = shareUrl ? `${shareText} ${shareUrl}` : shareText;
-    window.open(`sms:?body=${encodeURIComponent(text)}`, "_blank");
+    const a = document.createElement("a");
+    a.href = `sms:?body=${encodeURIComponent(text)}`;
+    a.click();
     setOpen(false);
   };
 

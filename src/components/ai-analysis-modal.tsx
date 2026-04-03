@@ -48,13 +48,24 @@ export function AiAnalysisModal({
 
     async function loadPdf() {
       if (pdfBlob) {
+        // Limite de ~10MB para enviar como base64 
+        if (pdfBlob.size > 10 * 1024 * 1024) {
+          setMessages([
+            {
+              role: "assistant",
+              text: "⚠️ O PDF é muito grande para análise (máximo 10 MB).",
+            },
+          ]);
+          return;
+        }
         const buffer = await pdfBlob.arrayBuffer();
-        const base64 = btoa(
-          new Uint8Array(buffer).reduce(
-            (data, byte) => data + String.fromCharCode(byte),
-            ""
-          )
-        );
+        const bytes = new Uint8Array(buffer);
+        let binary = "";
+        const chunkSize = 8192;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+        }
+        const base64 = btoa(binary);
         setPdfBase64(base64);
         // Auto-análise
         doAnalysis(base64, null);

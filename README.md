@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📄 PDFfULL — Conversor Instantâneo de PDF
 
-## Getting Started
+> Tire uma foto e converta em PDF otimizado em um clique. Grátis, rápido e direto do celular.
 
-First, run the development server:
+**Produção:** [pdffull.vercel.app](https://pdffull.vercel.app)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## Funcionalidades
+
+- **Foto → PDF em 1 clique** — Capture com a câmera ou selecione da galeria
+- **Processamento local** — Compressão e geração de PDF acontecem no navegador, sem enviar suas fotos para nenhum servidor
+- **Múltiplas páginas** — Adicione várias fotos, reordene e gere um PDF multi-página
+- **Compartilhar** — WhatsApp, Email, SMS ou Web Share API (mobile com arquivo anexado)
+- **Análise com IA** — Gemini analisa o conteúdo do PDF com chat de follow-up
+- **Histórico** — Conversões salvas na nuvem com seleção em lote, download e exclusão
+- **PWA** — Instalável como app nativo no celular
+- **SaaS** — Plano Free (5/mês) e Pro (R$ 9,90/mês, ilimitado) via Mercado Pago
+
+## Stack
+
+| Camada | Tecnologia |
+|--------|-----------|
+| Frontend | Next.js 16, React 19, TypeScript 5, Tailwind CSS v4, shadcn/ui v4 |
+| Backend | Next.js API Routes (App Router) |
+| Auth | Supabase Auth (Google OAuth + Magic Link) |
+| Banco | Supabase (PostgreSQL + RLS) |
+| Storage | Cloudflare R2 (S3-compatible) |
+| Pagamentos | Mercado Pago (Checkout Pro) |
+| IA | Google Gemini 2.5 Flash |
+| Emails | Resend |
+| Deploy | Vercel |
+| Testes | Playwright (48 E2E specs) |
+
+## Estrutura do Projeto
+
+```
+src/
+├── app/
+│   ├── (auth)/          # Login, Register
+│   ├── (dashboard)/     # Converter, Histórico, Conta
+│   ├── api/             # Upload, Checkout, Analyze, Webhooks, CRON
+│   ├── auth/            # Callback OAuth
+│   ├── sobre/           # Sobre nós
+│   ├── termos/          # Termos de uso
+│   ├── privacidade/     # Política de privacidade
+│   └── page.tsx         # Landing page
+├── components/          # UI components (share-menu, ai-modal, etc.)
+├── hooks/               # use-conversion-limit
+├── lib/
+│   ├── supabase/        # Client + Server
+│   ├── pdf/             # Compress + Generate (client-side)
+│   ├── r2/              # Upload para Cloudflare R2
+│   └── email/           # Resend (boas-vindas, upgrade)
+└── types/               # TypeScript types
+docs/                    # Documentação (kanban, visão geral, guias)
+supabase/                # Migrations SQL (001-004)
+tests/                   # Playwright E2E
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup Local
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 1. Clonar
+git clone https://github.com/Tonx-Cloud/pdffull.git
+cd pdffull
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 2. Instalar dependências
+npm install
 
-## Learn More
+# 3. Configurar variáveis de ambiente
+cp .env.example .env.local
+# Preencher com suas chaves (Supabase, R2, Mercado Pago, Gemini, Resend)
 
-To learn more about Next.js, take a look at the following resources:
+# 4. Rodar migrations no Supabase
+# Execute 001_initial_schema.sql até 004_delete_policy.sql no SQL Editor do Supabase
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 5. Desenvolvimento
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Variáveis de Ambiente
 
-## Deploy on Vercel
+Veja `.env.example` para a lista completa. As principais:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Variável | Descrição |
+|----------|-----------|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Chave anon do Supabase |
+| `SUPABASE_SERVICE_ROLE_KEY` | Chave service role (admin) |
+| `GEMINI_API_KEY` | Chave da API Google Gemini |
+| `RESEND_API_KEY` | Chave da API Resend |
+| `R2_*` | Credenciais Cloudflare R2 |
+| `MP_ACCESS_TOKEN` | Token Mercado Pago |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Segurança
+
+- Validação MIME type + magic bytes no upload
+- Sanitização de filenames (path traversal prevention)
+- 6 security headers (HSTS, X-Frame-Options DENY, CSP, etc.)
+- Webhook HMAC SHA256 validation (Mercado Pago)
+- Auditoria de webhooks (tabela `webhook_logs`)
+- RLS em todas as tabelas
+- Aceite obrigatório de Termos de Uso (checkbox + modal)
+
+## Deploy
+
+Push para `master` → deploy automático na Vercel.
+
+```bash
+git push origin master
+```
+
+## Documentação
+
+- [Kanban Geral](docs/KANBAN-GERAL.md) — Roadmap completo com todas as fases
+- [Visão Geral](docs/01-VISAO-GERAL-DO-PROJETO.md) — Arquitetura e decisões técnicas
+
+## Licença
+
+Projeto proprietário — © 2026 PDFfULL. Todos os direitos reservados.

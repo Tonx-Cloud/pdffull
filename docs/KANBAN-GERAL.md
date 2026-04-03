@@ -31,7 +31,8 @@
 | **FASE 4.8** | 3 | ✅ | Infra Produção (Supabase, Icons, OAuth) |
 | **FASE 4.9** | 6 | ✅ | Hardening de Segurança |
 | **FASE 5** | 5 | 🔲 | Publicação nas Lojas |
-| **TOTAL** | **50** | 🔄 | Do setup ao lançamento |
+| **FASE 6** | 8 | ✅ | Compartilhar, Excluir, IA & Emails |
+| **TOTAL** | **58** | 🔄 | Do setup ao lançamento |
 
 ---
 
@@ -171,6 +172,25 @@
 | 5.3 | 🔄 | **Assets da loja** — Ícone 512x512 ✅, screenshots (celular + tablet) 🔲, descrição curta/longa 🔲, feature graphic 🔲 |
 | 5.4 | 🔲 | **Upload Play Store** — Gerar `.aab`, criar listing no Google Play Console, enviar para revisão |
 | 5.5 | 🔲 | **iOS (futuro)** — Avaliar Capacitor para empacotamento iOS, criar conta Apple Developer ($99/ano) |
+
+---
+
+## FASE 6 — Compartilhar, Excluir, IA & Emails
+
+> **Objetivo:** Adicionar ações avançadas nos PDFs (compartilhar, excluir, análise IA) e emails transacionais  
+> **Pré-requisito:** Fases 0-4.9 concluídas  
+> **Entrega:** Botões de compartilhar (WhatsApp/Email/SMS), excluir, análise IA com Gemini, e emails de boas-vindas
+
+| # | Tarefa | Detalhes | Status |
+|---|--------|----------|:------:|
+| 6.1 | ✅ | **Share Menu** — Componente dropdown com opções WhatsApp, Email, SMS (abre app nativo com link do PDF) + Web Share API (mobile file sharing) |
+| 6.2 | ✅ | **Botão Excluir** — API `DELETE /api/conversions/[id]` com RLS. Remove do banco e R2. Botão no histórico com confirmação |
+| 6.3 | ✅ | **Histórico Interativo** — Converter para client component com seleção múltipla, ações em lote (compartilhar/excluir vários), botões por item |
+| 6.4 | ✅ | **API Análise IA** — `POST /api/analyze` envia PDF (base64) ao Gemini 2.5 Flash. Retorna análise textual + streaming para chat |
+| 6.5 | ✅ | **Modal Análise IA** — Dialog com análise inicial do PDF + campo de chat para perguntas follow-up sobre o documento |
+| 6.6 | ✅ | **Emails Transacionais (Resend)** — Configurar Resend. Email de boas-vindas + notificação de upgrade Pro |
+| 6.7 | ✅ | **Organizar raiz** — Mover `ideia_inicial.md` para `docs/`. Limpar arquivos desnecessários. Criar `.env.example` |
+| 6.8 | ✅ | **Atualizar README** — README personalizado com descrição, features, stack, setup local, deploy |
 
 ---
 

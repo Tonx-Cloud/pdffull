@@ -1,8 +1,11 @@
 "use client";
 
-import { Download, Share2, RotateCcw } from "lucide-react";
+import { Download, RotateCcw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ShareMenu } from "@/components/share-menu";
+import { useState } from "react";
+import { AiAnalysisModal } from "@/components/ai-analysis-modal";
 
 interface PdfResultProps {
   pdfBlob: Blob;
@@ -20,6 +23,7 @@ export function PdfResult({
   const sizeKB = (pdfBlob.size / 1024).toFixed(0);
   const sizeMB = (pdfBlob.size / (1024 * 1024)).toFixed(1);
   const sizeLabel = pdfBlob.size > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
+  const [showAi, setShowAi] = useState(false);
 
   const handleDownload = () => {
     const url = URL.createObjectURL(pdfBlob);
@@ -30,26 +34,6 @@ export function PdfResult({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
-
-  const handleShare = async () => {
-    if (!navigator.share) {
-      // Fallback: copiar link (funcionalidade futura com R2)
-      handleDownload();
-      return;
-    }
-
-    try {
-      const file = new File([pdfBlob], filename, { type: "application/pdf" });
-      await navigator.share({
-        title: "PDFfULL",
-        text: `PDF gerado: ${filename}`,
-        files: [file],
-      });
-    } catch {
-      // Usuário cancelou share ou não suportado
-      handleDownload();
-    }
   };
 
   return (
@@ -89,15 +73,17 @@ export function PdfResult({
             <Download className="h-4 w-4" />
             Baixar PDF
           </Button>
-          <Button
-            variant="outline"
-            className="flex-1 gap-2"
-            onClick={handleShare}
-          >
-            <Share2 className="h-4 w-4" />
-            Compartilhar
-          </Button>
+          <ShareMenu pdfBlob={pdfBlob} filename={filename} />
         </div>
+
+        <Button
+          variant="outline"
+          className="w-full gap-2"
+          onClick={() => setShowAi(true)}
+        >
+          <Sparkles className="h-4 w-4" />
+          Análise com IA
+        </Button>
 
         <Button
           variant="ghost"
@@ -107,6 +93,13 @@ export function PdfResult({
           <RotateCcw className="h-4 w-4" />
           Nova conversão
         </Button>
+
+        <AiAnalysisModal
+          open={showAi}
+          onOpenChange={setShowAi}
+          pdfBlob={pdfBlob}
+          filename={filename}
+        />
       </CardContent>
     </Card>
   );

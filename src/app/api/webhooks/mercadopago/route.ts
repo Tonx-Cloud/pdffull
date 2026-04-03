@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { createClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
+import { sendUpgradeEmail } from "@/lib/email/resend";
 
 function getSupabaseAdmin() {
   return createClient(
@@ -184,6 +185,19 @@ export async function POST(request: NextRequest) {
 
   if (profileError) {
     console.error("Webhook MP: erro ao atualizar profile:", profileError);
+  }
+
+  // Enviar email de upgrade
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("email, name")
+    .eq("id", userId)
+    .single();
+  if (profileData?.email) {
+    sendUpgradeEmail(
+      profileData.email,
+      profileData.name || profileData.email.split("@")[0]
+    ).catch(() => {});
   }
 
   await logWebhookAttempt(supabase, {

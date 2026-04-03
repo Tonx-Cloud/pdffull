@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { CameraCapture } from "@/components/camera-capture";
 import { ImageList } from "@/components/image-list";
 import { PdfResult } from "@/components/pdf-result";
@@ -24,7 +24,16 @@ export default function ConverterPage() {
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [pdfFilename, setPdfFilename] = useState("");
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const limit = useConversionLimit();
+
+  // Verificar se está logado
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+    });
+  }, []);
 
   const handleCapture = useCallback((files: File[]) => {
     setImages((prev) => [...prev, ...files]);
@@ -76,61 +85,54 @@ export default function ConverterPage() {
 
       const filename = getPdfFilename(images[0]?.name);
 
-      // Etapa 3: Upload direto ao Supabase Storage via signed URL
-      // (evita limite de 4.5MB do body nas serverless functions)
-      setProgressLabel("Salvando na nuvem...");
-      setProgress(80);
+      // Etapa 3: Upload para nuvem (apenas se logado)
+      if (isLoggedIn) {
+        setProgressLabel("Salvando na nuvem...");
+        setProgress(80);
 
-      // 3a. Obter signed upload URL do servidor
-      const signedRes = await fetch("/api/upload/signed-url", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename }),
-      });
-
-      if (!signedRes.ok) {
-        const signedData = await signedRes.json().catch(() => ({}));
-        throw new Error(signedData.error || "Erro ao preparar upload");
-      }
-
-      const { signedUrl, token, storageKey, filename: sanitizedName } =
-        await signedRes.json();
-
-      // 3b. Upload do PDF direto ao Storage (sem passar pelo serverless)
-      setProgress(85);
-      const supabase = createClient();
-      const { error: uploadError } = await supabase.storage
-        .from("pdfs")
-        .uploadToSignedUrl(storageKey, token, blob, {
-          contentType: "application/pdf",
+        const signedRes = await fetch("/api/upload/signed-url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename }),
         });
 
-      if (uploadError) {
-        throw new Error("Erro ao salvar arquivo. Tente novamente.");
-      }
+        if (signedRes.ok) {
+          const { token, storageKey, filename: sanitizedName } =
+            await signedRes.json();
 
-      setProgress(92);
+          setProgress(85);
+          const supabase = createClient();
+          const { error: uploadError } = await supabase.storage
+            .from("pdfs")
+            .uploadToSignedUrl(storageKey, token, blob, {
+              contentType: "application/pdf",
+            });
 
-      // 3c. Obter URL pública
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("pdfs").getPublicUrl(storageKey);
+          if (!uploadError) {
+            setProgress(92);
+            const {
+              data: { publicUrl },
+            } = supabase.storage.from("pdfs").getPublicUrl(storageKey);
 
-      // 3d. Registrar conversão via API leve (sem enviar arquivo)
-      const res = await fetch("/api/conversions/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filename: sanitizedName,
-          pdf_url: publicUrl,
-          pages: images.length,
-          size_bytes: blob.size,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Erro ao registrar conversão");
+            await fetch("/api/conversions/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                filename: sanitizedName,
+                pdf_url: publicUrl,
+                pages: images.length,
+                size_bytes: blob.size,
+              }),
+            });
+          }
+        }
+      } else {
+        // Modo anônimo: incrementar contador local
+        const key = "pdffull_anon_conversions";
+        const stored = JSON.parse(localStorage.getItem(key) || '{"count":0,"month":""}');
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const count = stored.month === currentMonth ? stored.count + 1 : 1;
+        localStorage.setItem(key, JSON.stringify({ count, month: currentMonth }));
       }
 
       setProgress(100);
@@ -164,6 +166,7 @@ export default function ConverterPage() {
           filename={pdfFilename}
           pageCount={images.length}
           onReset={handleReset}
+          isAnon={!isLoggedIn}
         />
       </div>
     );
@@ -203,11 +206,21 @@ export default function ConverterPage() {
             {!limit.canConvert && <AlertTriangle className="h-4 w-4 text-red-600" />}
             <span className={limit.canConvert ? "text-blue-700" : "text-red-700"}>
               {limit.canConvert
-                ? `${limit.used}/5 conversões usadas este mês`
-                : "Limite mensal atingido"}
+                ? `${limit.used}/${limit.max} conversões usadas este mês`
+                : limit.isAnon
+                  ? "Limite gratuito atingido"
+                  : "Limite mensal atingido"}
             </span>
           </div>
-          {!limit.canConvert && (
+          {!limit.canConvert && limit.isAnon && (
+            <a
+              href="/register"
+              className="text-blue-600 hover:underline text-xs mt-1 inline-block font-medium"
+            >
+              Cadastre-se grátis e ganhe +3 conversões →
+            </a>
+          )}
+          {!limit.canConvert && !limit.isAnon && (
             <button
               onClick={() => setShowUpgrade(true)}
               className="text-blue-600 hover:underline text-xs mt-1 inline-block"

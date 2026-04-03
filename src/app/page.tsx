@@ -1,6 +1,8 @@
 import { FileText, Camera, Zap, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { PwaInstallButton } from "@/components/pwa-install-button";
+import { PwaShareButton } from "@/components/pwa-share-button";
 
 export default function Home() {
   return (
@@ -49,8 +51,12 @@ export default function Home() {
             </Button>
           </Link>
           <p className="text-sm text-muted-foreground">
-            5 conversões grátis por mês • Sem cadastro necessário
+            2 conversões grátis sem cadastro • 5 com conta gratuita
           </p>
+          <div className="flex gap-2 mt-2">
+            <PwaInstallButton />
+            <PwaShareButton />
+          </div>
         </section>
 
         {/* Features */}
@@ -100,8 +106,8 @@ export default function Home() {
                   R$ 0<span className="text-sm font-normal">/mês</span>
                 </p>
                 <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                  <li>✓ 5 conversões por mês</li>
-                  <li>✓ Foto única → PDF</li>
+                  <li>✓ 2 conversões sem cadastro</li>
+                  <li>✓ 5 conversões/mês com conta</li>
                   <li>✓ Download direto</li>
                   <li>✓ Funciona offline</li>
                 </ul>

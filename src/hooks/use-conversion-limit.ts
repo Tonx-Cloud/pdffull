@@ -5,15 +5,29 @@ import { createClient } from "@/lib/supabase/client";
 import type { ConversionLimit } from "@/types";
 
 const FREE_LIMIT = 5;
+const ANON_LIMIT = 2;
 const POLL_INTERVAL = 30_000; // 30 segundos
+const ANON_STORAGE_KEY = "pdffull_anon_conversions";
 
-export function useConversionLimit(): ConversionLimit & { loading: boolean; refresh: () => void } {
-  const [state, setState] = useState<ConversionLimit & { loading: boolean }>({
+function getAnonUsage(): number {
+  if (typeof window === "undefined") return 0;
+  try {
+    const stored = JSON.parse(localStorage.getItem(ANON_STORAGE_KEY) || '{"count":0,"month":""}');
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    return stored.month === currentMonth ? stored.count : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function useConversionLimit(): ConversionLimit & { loading: boolean; refresh: () => void; isAnon: boolean } {
+  const [state, setState] = useState<ConversionLimit & { loading: boolean; isAnon: boolean }>({
     used: 0,
     max: FREE_LIMIT,
     canConvert: true,
     plan: "free",
     loading: true,
+    isAnon: false,
   });
 
   const fetchLimit = useCallback(async () => {
@@ -23,7 +37,16 @@ export function useConversionLimit(): ConversionLimit & { loading: boolean; refr
     } = await supabase.auth.getUser();
 
     if (!user) {
-      setState({ used: 0, max: FREE_LIMIT, canConvert: true, plan: "free", loading: false });
+      // Modo anônimo: usa localStorage
+      const anonUsed = getAnonUsage();
+      setState({
+        used: anonUsed,
+        max: ANON_LIMIT,
+        canConvert: anonUsed < ANON_LIMIT,
+        plan: "free",
+        loading: false,
+        isAnon: true,
+      });
       return;
     }
 
@@ -34,7 +57,7 @@ export function useConversionLimit(): ConversionLimit & { loading: boolean; refr
       .single();
 
     if (!profile) {
-      setState({ used: 0, max: FREE_LIMIT, canConvert: true, plan: "free", loading: false });
+      setState({ used: 0, max: FREE_LIMIT, canConvert: true, plan: "free", loading: false, isAnon: false });
       return;
     }
 
@@ -49,7 +72,7 @@ export function useConversionLimit(): ConversionLimit & { loading: boolean; refr
     const max = plan === "pro" ? Infinity : FREE_LIMIT;
     const canConvert = plan === "pro" || used < FREE_LIMIT;
 
-    setState({ used, max, canConvert, plan, loading: false });
+    setState({ used, max, canConvert, plan, loading: false, isAnon: false });
   }, []);
 
   useEffect(() => {

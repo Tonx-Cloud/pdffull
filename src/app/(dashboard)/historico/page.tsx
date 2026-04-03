@@ -11,10 +11,15 @@ import {
   CheckSquare,
   Square,
   Loader2,
+  Pencil,
+  Check,
+  X,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareMenu } from "@/components/share-menu";
 import { AiAnalysisModal } from "@/components/ai-analysis-modal";
+import { PdfViewerModal } from "@/components/pdf-viewer-modal";
 import { toast } from "sonner";
 
 function formatBytes(bytes: number): string {
@@ -42,6 +47,9 @@ export default function HistoricoPage() {
   const [deleting, setDeleting] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [aiItem, setAiItem] = useState<Conversion | null>(null);
+  const [viewerItem, setViewerItem] = useState<Conversion | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
   const supabase = createClient();
 
   const fetchItems = useCallback(async () => {
@@ -134,6 +142,31 @@ export default function HistoricoPage() {
       `https://wa.me/?text=${encodeURIComponent(text)}`,
       "_blank"
     );
+  };
+
+  const startRename = (c: Conversion) => {
+    setEditingId(c.id);
+    setEditName(c.filename);
+  };
+
+  const handleRename = async () => {
+    if (!editingId || !editName.trim()) return;
+    const res = await fetch(`/api/conversions/${editingId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ filename: editName.trim() }),
+    });
+    if (res.ok) {
+      setItems((prev) =>
+        prev.map((c) =>
+          c.id === editingId ? { ...c, filename: editName.trim() } : c
+        )
+      );
+      toast.success("PDF renomeado");
+    } else {
+      toast.error("Erro ao renomear");
+    }
+    setEditingId(null);
   };
 
   if (loading) {
@@ -230,7 +263,35 @@ export default function HistoricoPage() {
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <FileText className="h-8 w-8 text-blue-600 shrink-0" />
                 <div className="min-w-0">
-                  <p className="font-medium truncate">{c.filename}</p>
+                  {editingId === c.id ? (
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleRename();
+                          if (e.key === "Escape") setEditingId(null);
+                        }}
+                        className="h-7 rounded border px-2 text-sm font-medium w-full max-w-[200px]"
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleRename}
+                        className="p-1 text-green-600 hover:bg-green-50 rounded"
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setEditingId(null)}
+                        className="p-1 text-gray-400 hover:bg-gray-50 rounded"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="font-medium truncate">{c.filename}</p>
+                  )}
                   <p className="text-xs text-muted-foreground">
                     {c.pages} {c.pages === 1 ? "página" : "páginas"} •{" "}
                     {formatBytes(c.size_bytes)} • {formatDate(c.created_at)}
@@ -240,6 +301,24 @@ export default function HistoricoPage() {
 
               {/* Ações */}
               <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => startRename(c)}
+                  className="rounded-lg border p-2 hover:bg-blue-50 transition"
+                  title="Renomear"
+                >
+                  <Pencil className="h-5 w-5 text-blue-600" />
+                </button>
+
+                {c.pdf_url && !c.pdf_url.startsWith("local://") && (
+                  <button
+                    onClick={() => setViewerItem(c)}
+                    className="rounded-lg border p-2 hover:bg-green-50 transition"
+                    title="Visualizar PDF"
+                  >
+                    <Eye className="h-5 w-5 text-green-600" />
+                  </button>
+                )}
+
                 <button
                   onClick={() => setAiItem(c)}
                   className="rounded-lg border p-2 hover:bg-purple-50 transition"
@@ -291,6 +370,16 @@ export default function HistoricoPage() {
           onOpenChange={(open) => !open && setAiItem(null)}
           pdfUrl={aiItem.pdf_url}
           filename={aiItem.filename}
+        />
+      )}
+
+      {/* Modal Leitor PDF */}
+      {viewerItem && (
+        <PdfViewerModal
+          open={!!viewerItem}
+          onOpenChange={(open) => !open && setViewerItem(null)}
+          pdfUrl={viewerItem.pdf_url}
+          filename={viewerItem.filename}
         />
       )}
     </div>

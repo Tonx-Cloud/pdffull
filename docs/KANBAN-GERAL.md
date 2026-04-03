@@ -25,8 +25,8 @@
 |------|:-------:|:------:|-----------|
 | **FASE 0** | 8 | ✅ | Setup & Infraestrutura |
 | **FASE 1** | 8 | ✅ | Core Engine (Conversão & UI) |
-| **FASE 2** | 7 | � | Auth & SaaS (Usuários & Limites) |
-| **FASE 3** | 6 | 🔲 | Monetização (Mercado Pago) |
+| **FASE 2** | 7 | ✅ | Auth & SaaS (Usuários & Limites) |
+| **FASE 3** | 6 | ✅ | Monetização (Mercado Pago) |
 | **FASE 4** | 7 | 🔲 | Polish, Landing & Deploy |
 | **FASE 5** | 5 | 🔲 | Publicação nas Lojas |
 | **TOTAL** | **41** | 🔲 | Do setup ao lançamento |
@@ -98,12 +98,12 @@
 
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
-| 3.1 | 🔲 | **Criar conta Mercado Pago** — Cadastrar em developers.mercadopago.com, criar aplicação, obter `ACCESS_TOKEN` e `PUBLIC_KEY` |
-| 3.2 | 🔲 | **API Route `/api/checkout`** — Gerar preferência de pagamento (Checkout Pro) com plano Pro R$9,90/mês, URLs de callback |
-| 3.3 | 🔲 | **Webhook `/api/webhooks/mercadopago`** — Receber notificações de pagamento, validar assinatura, atualizar `subscriptions` e `profiles.plan` no Supabase |
-| 3.4 | 🔲 | **Planos no banco** — Seed com configurações: Free (5/mês, grátis), Pro (ilimitado, R$9,90/mês) |
-| 3.5 | 🔲 | **Upgrade Flow na UI** — Modal/página de upgrade com benefícios do Pro, botão que redireciona para checkout MP |
-| 3.6 | 🔲 | **Cancelamento** — Página para cancelar assinatura, chamar API do MP para cancelar, atualizar status no banco |
+| 3.1 | ✅ | **Criar conta Mercado Pago** — Cadastrar em developers.mercadopago.com, criar aplicação, obter `ACCESS_TOKEN` e `PUBLIC_KEY` |
+| 3.2 | ✅ | **API Route `/api/checkout`** — Gerar preferência de pagamento (Checkout Pro) com plano Pro R$9,90/mês, URLs de callback |
+| 3.3 | ✅ | **Webhook `/api/webhooks/mercadopago`** — Receber notificações de pagamento, validar assinatura, atualizar `subscriptions` e `profiles.plan` no Supabase |
+| 3.4 | ✅ | **Planos no banco** — Seed com configurações: Free (5/mês, grátis), Pro (ilimitado, R$9,90/mês) |
+| 3.5 | ✅ | **Upgrade Flow na UI** — Modal/página de upgrade com benefícios do Pro, botão que redireciona para checkout MP |
+| 3.6 | ✅ | **Cancelamento** — Página para cancelar assinatura, chamar API do MP para cancelar, atualizar status no banco |
 
 ---
 

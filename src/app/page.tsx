@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PwaInstallButton } from "@/components/pwa-install-button";
 import { PwaShareButton } from "@/components/pwa-share-button";
+import { LanguageSelector } from "@/components/language-selector";
 
 export default function Home() {
   return (
@@ -11,7 +12,8 @@ export default function Home() {
       <header className="border-b bg-white px-4 py-3">
         <div className="mx-auto flex max-w-4xl items-center justify-between">
           <h1 className="text-xl font-bold text-blue-600">PDFfULL</h1>
-          <nav className="flex gap-3">
+          <nav className="flex gap-3 items-center">
+            <LanguageSelector />
             <Link href="/login">
               <Button variant="ghost" size="sm">
                 Entrar

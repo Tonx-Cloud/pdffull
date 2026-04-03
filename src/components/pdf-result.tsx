@@ -1,12 +1,22 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Download, RotateCcw, Sparkles, UserPlus, Pencil, Check, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShareMenu } from "@/components/share-menu";
 import { useState } from "react";
-import { AiAnalysisModal } from "@/components/ai-analysis-modal";
-import { PdfViewerModal } from "@/components/pdf-viewer-modal";
+import { useTranslations } from "next-intl";
+
+const AiAnalysisModal = dynamic(
+  () => import("@/components/ai-analysis-modal").then((m) => m.AiAnalysisModal),
+  { ssr: false }
+);
+
+const PdfViewerModal = dynamic(
+  () => import("@/components/pdf-viewer-modal").then((m) => m.PdfViewerModal),
+  { ssr: false }
+);
 
 interface PdfResultProps {
   pdfBlob: Blob;
@@ -30,6 +40,7 @@ export function PdfResult({
   const [showViewer, setShowViewer] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [currentName, setCurrentName] = useState(filename);
+  const t = useTranslations("Result");
 
   const handleDownload = () => {
     const url = URL.createObjectURL(pdfBlob);
@@ -62,7 +73,7 @@ export function PdfResult({
         </div>
 
         <div className="text-center">
-          <h3 className="text-lg font-semibold">PDF Gerado!</h3>
+          <h3 className="text-lg font-semibold">{t("pdfGenerated")}</h3>
           <p className="text-sm text-muted-foreground">
             {pageCount} {pageCount === 1 ? "página" : "páginas"} • {sizeLabel}
           </p>
@@ -113,7 +124,7 @@ export function PdfResult({
             onClick={handleDownload}
           >
             <Download className="h-4 w-4" />
-            Baixar PDF
+            {t("downloadPdf")}
           </Button>
           <ShareMenu pdfBlob={pdfBlob} filename={currentName} />
         </div>
@@ -124,7 +135,7 @@ export function PdfResult({
           onClick={() => setShowViewer(true)}
         >
           <Eye className="h-4 w-4" />
-          Visualizar PDF
+          {t("viewPdf")}
         </Button>
 
         <Button
@@ -133,7 +144,7 @@ export function PdfResult({
           onClick={() => setShowAi(true)}
         >
           <Sparkles className="h-4 w-4" />
-          Análise com IA
+          {t("aiAnalysis")}
         </Button>
 
         <Button
@@ -142,7 +153,7 @@ export function PdfResult({
           onClick={onReset}
         >
           <RotateCcw className="h-4 w-4" />
-          Nova conversão
+          {t("newConversion")}
         </Button>
 
         {isAnon && (
@@ -152,10 +163,10 @@ export function PdfResult({
           >
             <div className="flex items-center justify-center gap-2 text-blue-700 font-medium text-sm">
               <UserPlus className="h-4 w-4" />
-              Cadastre-se grátis e ganhe +3 conversões
+              {t("signUpCta")}
             </div>
             <p className="text-xs text-blue-600 mt-1">
-              Salve na nuvem, compartilhe e acesse o histórico
+              {t("signUpCtaDesc")}
             </p>
           </a>
         )}

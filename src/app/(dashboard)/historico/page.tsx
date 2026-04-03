@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { createClient } from "@/lib/supabase/client";
 import type { Conversion } from "@/types";
 import {
@@ -15,12 +16,23 @@ import {
   Check,
   X,
   Eye,
+  Merge,
 } from "lucide-react";
+import { PDFDocument } from "pdf-lib";
 import { Button } from "@/components/ui/button";
 import { ShareMenu } from "@/components/share-menu";
-import { AiAnalysisModal } from "@/components/ai-analysis-modal";
-import { PdfViewerModal } from "@/components/pdf-viewer-modal";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+
+const AiAnalysisModal = dynamic(
+  () => import("@/components/ai-analysis-modal").then((m) => m.AiAnalysisModal),
+  { ssr: false }
+);
+
+const PdfViewerModal = dynamic(
+  () => import("@/components/pdf-viewer-modal").then((m) => m.PdfViewerModal),
+  { ssr: false }
+);
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -46,11 +58,13 @@ export default function HistoricoPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [merging, setMerging] = useState(false);
   const [aiItem, setAiItem] = useState<Conversion | null>(null);
   const [viewerItem, setViewerItem] = useState<Conversion | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const supabase = createClient();
+  const t = useTranslations("History");
 
   const fetchItems = useCallback(async () => {
     const { data } = await supabase
@@ -93,9 +107,9 @@ export default function HistoricoPage() {
         next.delete(id);
         return next;
       });
-      toast.success("PDF excluído");
+      toast.success(t("pdfDeleted"));
     } else {
-      toast.error("Erro ao excluir");
+      toast.error(t("deleteError"));
     }
     setDeleting((prev) => {
       const next = new Set(prev);
@@ -107,7 +121,7 @@ export default function HistoricoPage() {
   const handleBulkDelete = async () => {
     if (selected.size === 0) return;
     const confirmed = window.confirm(
-      `Excluir ${selected.size} ${selected.size === 1 ? "PDF" : "PDFs"}?`
+      t("confirmBulkDelete", { count: selected.size })
     );
     if (!confirmed) return;
 
@@ -123,7 +137,7 @@ export default function HistoricoPage() {
     setItems((prev) => prev.filter((c) => !deleted.includes(c.id)));
     setSelected(new Set());
     setBulkDeleting(false);
-    toast.success(`${deleted.length} PDF(s) excluído(s)`);
+    toast.success(t("bulkDeleted", { count: deleted.length }));
   };
 
   const handleBulkShare = () => {
@@ -133,7 +147,7 @@ export default function HistoricoPage() {
       .map((c) => c.pdf_url);
 
     if (urls.length === 0) {
-      toast.error("Nenhum PDF selecionado possui link compartilhável");
+      toast.error(t("noShareableLink"));
       return;
     }
 
@@ -149,6 +163,45 @@ export default function HistoricoPage() {
     setEditName(c.filename);
   };
 
+  const handleMerge = async () => {
+    const selectedItems = items.filter((c) => selected.has(c.id));
+    const urls = selectedItems
+      .map((c) => c.pdf_url)
+      .filter((url): url is string => !!url && !url.startsWith("local://"));
+
+    if (urls.length < 2) {
+      toast.error(t("mergeMinTwo"));
+      return;
+    }
+
+    setMerging(true);
+    try {
+      const merged = await PDFDocument.create();
+      for (const url of urls) {
+        const res = await fetch(url);
+        const bytes = await res.arrayBuffer();
+        const doc = await PDFDocument.load(bytes);
+        const pages = await merged.copyPages(doc, doc.getPageIndices());
+        pages.forEach((p) => merged.addPage(p));
+      }
+      const pdfBytes = await merged.save();
+      const blob = new Blob([pdfBytes as unknown as ArrayBuffer], { type: "application/pdf" });
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `merged_${urls.length}_pdfs.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+      toast.success(t("mergeSuccess", { count: urls.length }));
+    } catch {
+      toast.error(t("mergeError"));
+    } finally {
+      setMerging(false);
+    }
+  };
+
   const handleRename = async () => {
     if (!editingId || !editName.trim()) return;
     const res = await fetch(`/api/conversions/${editingId}`, {
@@ -162,9 +215,9 @@ export default function HistoricoPage() {
           c.id === editingId ? { ...c, filename: editName.trim() } : c
         )
       );
-      toast.success("PDF renomeado");
+      toast.success(t("pdfRenamed"));
     } else {
-      toast.error("Erro ao renomear");
+      toast.error(t("renameError"));
     }
     setEditingId(null);
   };
@@ -181,15 +234,15 @@ export default function HistoricoPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Histórico</h1>
-          <p className="text-muted-foreground mt-1">Suas últimas conversões</p>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
         </div>
         {items.length > 0 && (
           <button
             onClick={toggleSelectAll}
             className="text-sm text-blue-600 hover:underline"
           >
-            {selected.size === items.length ? "Desmarcar todos" : "Selecionar todos"}
+            {selected.size === items.length ? t("deselectAll") : t("selectAll")}
           </button>
         )}
       </div>
@@ -198,9 +251,23 @@ export default function HistoricoPage() {
       {selected.size > 0 && (
         <div className="flex items-center gap-3 rounded-xl border bg-blue-50 border-blue-200 p-3">
           <span className="text-sm font-medium text-blue-700">
-            {selected.size} selecionado(s)
+            {t("selected", { count: selected.size })}
           </span>
-          <div className="flex gap-2 ml-auto">
+          <div className="flex gap-2 ml-auto flex-wrap">
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1"
+              onClick={handleMerge}
+              disabled={merging}
+            >
+              {merging ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Merge className="h-3 w-3" />
+              )}
+              {t("mergePdfs")} ({selected.size})
+            </Button>
             <Button
               size="sm"
               variant="outline"
@@ -221,7 +288,7 @@ export default function HistoricoPage() {
               ) : (
                 <Trash2 className="h-3 w-3" />
               )}
-              Excluir ({selected.size})
+              {t("bulkDelete")} ({selected.size})
             </Button>
           </div>
         </div>
@@ -230,12 +297,12 @@ export default function HistoricoPage() {
       {items.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
           <FileText className="h-12 w-12 mx-auto mb-4 opacity-40" />
-          <p>Nenhuma conversão ainda.</p>
+          <p>{t("noConversions")}</p>
           <a
             href="/converter"
             className="text-blue-600 hover:underline text-sm mt-2 inline-block"
           >
-            Fazer primeira conversão
+            {t("firstConversion")}
           </a>
         </div>
       ) : (
@@ -243,26 +310,26 @@ export default function HistoricoPage() {
           {items.map((c) => (
             <div
               key={c.id}
-              className={`flex items-center gap-3 rounded-xl border p-4 bg-white transition ${
+              className={`rounded-xl border p-4 bg-white transition ${
                 selected.has(c.id) ? "ring-2 ring-blue-300 border-blue-300" : ""
               }`}
             >
-              {/* Checkbox */}
-              <button
-                onClick={() => toggleSelect(c.id)}
-                className="shrink-0 text-gray-400 hover:text-blue-600"
-              >
-                {selected.has(c.id) ? (
-                  <CheckSquare className="h-5 w-5 text-blue-600" />
-                ) : (
-                  <Square className="h-5 w-5" />
-                )}
-              </button>
+              {/* Linha 1: Checkbox + Ícone + Título/meta */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => toggleSelect(c.id)}
+                  className="shrink-0 text-gray-400 hover:text-blue-600"
+                >
+                  {selected.has(c.id) ? (
+                    <CheckSquare className="h-5 w-5 text-blue-600" />
+                  ) : (
+                    <Square className="h-5 w-5" />
+                  )}
+                </button>
 
-              {/* Info */}
-              <div className="flex items-center gap-3 min-w-0 flex-1">
                 <FileText className="h-8 w-8 text-blue-600 shrink-0" />
-                <div className="min-w-0">
+
+                <div className="min-w-0 flex-1">
                   {editingId === c.id ? (
                     <div className="flex items-center gap-1">
                       <input
@@ -299,14 +366,14 @@ export default function HistoricoPage() {
                 </div>
               </div>
 
-              {/* Ações */}
-              <div className="flex items-center gap-1 shrink-0">
+              {/* Linha 2: Botões de ação */}
+              <div className="flex items-center gap-1 mt-3 pl-8 flex-wrap">
                 <button
                   onClick={() => startRename(c)}
                   className="rounded-lg border p-2 hover:bg-blue-50 transition"
                   title="Renomear"
                 >
-                  <Pencil className="h-5 w-5 text-blue-600" />
+                  <Pencil className="h-4 w-4 text-blue-600" />
                 </button>
 
                 {c.pdf_url && !c.pdf_url.startsWith("local://") && (
@@ -315,7 +382,7 @@ export default function HistoricoPage() {
                     className="rounded-lg border p-2 hover:bg-green-50 transition"
                     title="Visualizar PDF"
                   >
-                    <Eye className="h-5 w-5 text-green-600" />
+                    <Eye className="h-4 w-4 text-green-600" />
                   </button>
                 )}
 
@@ -324,7 +391,7 @@ export default function HistoricoPage() {
                   className="rounded-lg border p-2 hover:bg-purple-50 transition"
                   title="Análise com IA"
                 >
-                  <Sparkles className="h-5 w-5 text-purple-600" />
+                  <Sparkles className="h-4 w-4 text-purple-600" />
                 </button>
 
                 <ShareMenu
@@ -341,7 +408,7 @@ export default function HistoricoPage() {
                     className="rounded-lg border p-2 hover:bg-gray-50 transition"
                     title="Baixar"
                   >
-                    <Download className="h-5 w-5" />
+                    <Download className="h-4 w-4" />
                   </a>
                 )}
 
@@ -352,9 +419,9 @@ export default function HistoricoPage() {
                   title="Excluir"
                 >
                   {deleting.has(c.id) ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Trash2 className="h-5 w-5" />
+                    <Trash2 className="h-4 w-4" />
                   )}
                 </button>
               </div>

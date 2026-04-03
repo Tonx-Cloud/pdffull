@@ -1,8 +1,6 @@
 import { TermsAcceptanceModal } from "@/components/terms-acceptance-modal";
 import { DashboardHeader } from "@/components/dashboard-header";
 
-export const dynamic = "force-dynamic";
-
 export default function DashboardLayout({
   children,
 }: {

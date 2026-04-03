@@ -79,13 +79,13 @@
 
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
-| 2.1 | 🔲 | **Supabase Auth** — Configurar Google OAuth + Magic Link (email). Páginas `/login` e `/register` |
-| 2.2 | 🔲 | **Middleware de Auth** — Proteger rotas `(dashboard)`, redirecionar para login se não autenticado |
-| 2.3 | 🔲 | **Trigger de Profile** — Função SQL `on_auth_user_created` para criar registro em `profiles` automaticamente |
-| 2.4 | 🔲 | **Histórico de Conversões** — Página `/historico` listando PDFs gerados com data, nome, tamanho, link de download |
-| 2.5 | 🔲 | **Upload para R2** — Após conversão (usuário logado), fazer upload do PDF para Cloudflare R2 via API Route `/api/upload` |
-| 2.6 | 🔲 | **Middleware de Limites** — Hook `use-conversion-limit.ts` que verifica `conversions_this_month` < 5 (Free) ou ilimitado (Pro). Bloquear com modal de upgrade |
-| 2.7 | 🔲 | **Página de Conta** — `/conta` com nome, email, plano atual, uso do mês (X/5), botão de upgrade |
+| 2.1 | ✅ | **Supabase Auth** — Configurar Google OAuth + Magic Link (email). Páginas `/login` e `/register` |
+| 2.2 | ✅ | **Middleware de Auth** — Proteger rotas `(dashboard)`, redirecionar para login se não autenticado |
+| 2.3 | ✅ | **Trigger de Profile** — Função SQL `on_auth_user_created` para criar registro em `profiles` automaticamente |
+| 2.4 | ✅ | **Histórico de Conversões** — Página `/historico` listando PDFs gerados com data, nome, tamanho, link de download |
+| 2.5 | ✅ | **Upload para R2** — Após conversão (usuário logado), fazer upload do PDF para Cloudflare R2 via API Route `/api/upload` |
+| 2.6 | ✅ | **Middleware de Limites** — Hook `use-conversion-limit.ts` que verifica `conversions_this_month` < 5 (Free) ou ilimitado (Pro). Bloquear com modal de upgrade |
+| 2.7 | ✅ | **Página de Conta** — `/conta` com nome, email, plano atual, uso do mês (X/5), botão de upgrade |
 
 ---
 

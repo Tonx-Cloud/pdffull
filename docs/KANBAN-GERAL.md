@@ -28,9 +28,10 @@
 | **FASE 2** | 7 | ✅ | Auth & SaaS (Usuários & Limites) |
 | **FASE 3** | 6 | ✅ | Monetização (Mercado Pago) |
 | **FASE 4** | 7 | ✅ | Polish, Landing & Deploy |
-| **FASE 4.8** | 3 | 🔄 | Infra Produção (Supabase, Icons, OAuth) |
+| **FASE 4.8** | 3 | ✅ | Infra Produção (Supabase, Icons, OAuth) |
+| **FASE 4.9** | 6 | ✅ | Hardening de Segurança |
 | **FASE 5** | 5 | 🔲 | Publicação nas Lojas |
-| **TOTAL** | **44** | 🔄 | Do setup ao lançamento |
+| **TOTAL** | **50** | 🔄 | Do setup ao lançamento |
 
 ---
 
@@ -140,6 +141,23 @@
 
 ---
 
+## FASE 4.9 — Hardening de Segurança
+
+> **Objetivo:** Blindar a aplicação contra ataques comuns (OWASP Top 10)  
+> **Pré-requisito:** Fase 4.8 concluída  
+> **Entrega:** Upload validado, headers seguros, webhook blindado, logs de auditoria
+
+| # | Tarefa | Detalhes | Status |
+|---|--------|----------|:------:|
+| 4.9.1 | ✅ | **Validação MIME Type no Upload** — Aceitar apenas `application/pdf`, `image/jpeg`, `image/png`, `image/webp`. Validar magic bytes para PDFs |
+| 4.9.2 | ✅ | **Sanitização de Filename** — Remover caracteres especiais, limitar a 200 chars, prevenir path traversal |
+| 4.9.3 | ✅ | **Security Headers** — `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security`, `Referrer-Policy`, `Permissions-Policy` (câmera self-only) |
+| 4.9.4 | ✅ | **Webhook HMAC Validation** — Validar `x-signature` e `x-request-id` do Mercado Pago via HMAC SHA256. Rejeitar 401 se inválido |
+| 4.9.5 | ✅ | **Tabela webhook_logs** — Migration 002: auditoria de todas as tentativas (processed/rejected/ignored/error) com IP, verificação e detalhes |
+| 4.9.6 | ✅ | **RLS em webhook_logs** — RLS ativado sem policies = bloqueado para anon/authenticated, apenas service_role (admin) pode ler/escrever |
+
+---
+
 ## FASE 5 — Publicação nas Lojas
 
 > **Objetivo:** Publicar o PWA como app nativo na Google Play Store  
@@ -173,9 +191,13 @@ O processamento de imagem → PDF acontece **inteiramente no navegador** do usu�
 - Reset automático via CRON no dia 1 de cada mês
 - Sem login = sem contagem (mas também sem histórico/upload)
 
-### Segurança
+### Segurança (Fase 4.9 — Hardening)
 - Chaves privadas (`SUPABASE_SERVICE_ROLE_KEY`, `MP_ACCESS_TOKEN`, `R2_SECRET_ACCESS_KEY`) **nunca** expostas no client
 - Prefixo `NEXT_PUBLIC_` apenas para chaves públicas
-- RLS ativo em todas as tabelas do Supabase
-- Webhook do Mercado Pago validado via assinatura HMAC
+- RLS ativo em **todas** as tabelas do Supabase (profiles, conversions, subscriptions, webhook_logs)
+- Webhook do Mercado Pago validado via **assinatura HMAC SHA256** (`x-signature` + `x-request-id`)
+- Upload valida **MIME type** (image/jpeg, image/png, image/webp, application/pdf) e **magic bytes** para PDFs
+- **Filename sanitizado**: caracteres especiais removidos, máx 200 chars, previne path traversal
+- **Security headers**: X-Content-Type-Options nosniff, X-Frame-Options DENY, HSTS, Referrer-Policy, Permissions-Policy
+- **Tabela webhook_logs**: auditoria completa de todas as tentativas de webhook com IP, status e detalhes
 - Upload para R2 via API Route (server-side), nunca direto do client

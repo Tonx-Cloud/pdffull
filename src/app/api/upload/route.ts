@@ -4,6 +4,28 @@ import { uploadToR2 } from "@/lib/r2/upload";
 
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
 
+const ALLOWED_MIME_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+
+// PDF magic bytes: %PDF
+const PDF_MAGIC = Buffer.from([0x25, 0x50, 0x44, 0x46]);
+
+function sanitizeFilename(name: string): string {
+  return name
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/\.{2,}/g, ".")
+    .slice(0, 200);
+}
+
+function isValidPdf(buffer: Buffer): boolean {
+  if (buffer.length < 4) return false;
+  return buffer.subarray(0, 4).equals(PDF_MAGIC);
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const {
@@ -52,11 +74,20 @@ export async function POST(request: NextRequest) {
 
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
-  const filename = (formData.get("filename") as string) || "documento.pdf";
+  const rawFilename = (formData.get("filename") as string) || "documento.pdf";
+  const filename = sanitizeFilename(rawFilename);
   const pages = parseInt((formData.get("pages") as string) || "1", 10);
 
   if (!file) {
     return NextResponse.json({ error: "Arquivo não enviado" }, { status: 400 });
+  }
+
+  // Validar MIME type
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return NextResponse.json(
+      { error: "Tipo de arquivo não permitido" },
+      { status: 415 }
+    );
   }
 
   if (file.size > MAX_FILE_SIZE) {
@@ -67,6 +98,15 @@ export async function POST(request: NextRequest) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  // Validar magic bytes para PDFs
+  if (file.type === "application/pdf" && !isValidPdf(buffer)) {
+    return NextResponse.json(
+      { error: "Arquivo PDF inválido" },
+      { status: 400 }
+    );
+  }
+
   const pdfUrl = await uploadToR2(buffer, filename);
 
   // Registrar conversão

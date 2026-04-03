@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Payment } from "mercadopago";
 import { createClient } from "@supabase/supabase-js";
+import { createHmac } from "crypto";
 
 function getSupabaseAdmin() {
   return createClient(
@@ -16,31 +17,145 @@ function getMpPaymentApi() {
   return new Payment(mpClient);
 }
 
+function verifyWebhookSignature(
+  request: NextRequest,
+  dataId: string
+): boolean {
+  const secret = process.env.MP_WEBHOOK_SECRET;
+  if (!secret) return false;
+
+  const xSignature = request.headers.get("x-signature");
+  const xRequestId = request.headers.get("x-request-id");
+  if (!xSignature || !xRequestId) return false;
+
+  const parts = xSignature.split(",");
+  let ts = "";
+  let hash = "";
+
+  for (const part of parts) {
+    const [key, value] = part.trim().split("=");
+    if (key === "ts") ts = value;
+    if (key === "v1") hash = value;
+  }
+
+  if (!ts || !hash) return false;
+
+  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+  const hmac = createHmac("sha256", secret);
+  hmac.update(manifest);
+  const expectedHash = hmac.digest("hex");
+
+  return expectedHash === hash;
+}
+
+async function logWebhookAttempt(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  data: {
+    event_type: string;
+    payment_id: string | null;
+    status: string;
+    ip: string | null;
+    verified: boolean;
+    details: string | null;
+  }
+) {
+  await supabase.from("webhook_logs").insert(data).then(({ error }) => {
+    if (error) console.error("Erro ao salvar webhook_log:", error);
+  });
+}
+
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  const supabase = getSupabaseAdmin();
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] || null;
+
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    await logWebhookAttempt(supabase, {
+      event_type: "invalid_json",
+      payment_id: null,
+      status: "rejected",
+      ip,
+      verified: false,
+      details: "Body não é JSON válido",
+    });
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const dataId = String((body.data as Record<string, unknown>)?.id || "");
+
+  // Verificar assinatura HMAC se MP_WEBHOOK_SECRET estiver configurado
+  const hasSecret = !!process.env.MP_WEBHOOK_SECRET;
+  const verified = hasSecret ? verifyWebhookSignature(request, dataId) : false;
+
+  if (hasSecret && !verified) {
+    await logWebhookAttempt(supabase, {
+      event_type: String(body.type || "unknown"),
+      payment_id: dataId || null,
+      status: "rejected",
+      ip,
+      verified: false,
+      details: "Assinatura HMAC inválida",
+    });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   // Mercado Pago envia notificações com type e data.id
-  if (body.type !== "payment" || !body.data?.id) {
+  if (body.type !== "payment" || !dataId) {
+    await logWebhookAttempt(supabase, {
+      event_type: String(body.type || "unknown"),
+      payment_id: dataId || null,
+      status: "ignored",
+      ip,
+      verified,
+      details: "Tipo não é payment ou sem data.id",
+    });
     return NextResponse.json({ received: true });
   }
 
-  const paymentId = body.data.id;
+  const paymentId = Number(dataId);
   const paymentApi = getMpPaymentApi();
 
-  // Buscar detalhes do pagamento na API do MP
-  const payment = await paymentApi.get({ id: paymentId });
+  let payment;
+  try {
+    payment = await paymentApi.get({ id: paymentId });
+  } catch (err) {
+    await logWebhookAttempt(supabase, {
+      event_type: "payment",
+      payment_id: dataId,
+      status: "error",
+      ip,
+      verified,
+      details: `Erro ao buscar pagamento: ${err instanceof Error ? err.message : "unknown"}`,
+    });
+    return NextResponse.json({ error: "Payment fetch failed" }, { status: 500 });
+  }
 
   if (!payment || payment.status !== "approved") {
+    await logWebhookAttempt(supabase, {
+      event_type: "payment",
+      payment_id: dataId,
+      status: "ignored",
+      ip,
+      verified,
+      details: `Status: ${payment?.status || "null"}`,
+    });
     return NextResponse.json({ received: true });
   }
 
   const userId = payment.metadata?.user_id;
   if (!userId) {
-    console.error("Webhook MP: user_id não encontrado no metadata");
+    await logWebhookAttempt(supabase, {
+      event_type: "payment",
+      payment_id: dataId,
+      status: "error",
+      ip,
+      verified,
+      details: "user_id ausente no metadata",
+    });
     return NextResponse.json({ error: "user_id missing" }, { status: 400 });
   }
-
-  const supabase = getSupabaseAdmin();
 
   // Criar/atualizar assinatura
   const { error: subError } = await supabase.from("subscriptions").upsert(
@@ -70,6 +185,15 @@ export async function POST(request: NextRequest) {
   if (profileError) {
     console.error("Webhook MP: erro ao atualizar profile:", profileError);
   }
+
+  await logWebhookAttempt(supabase, {
+    event_type: "payment",
+    payment_id: dataId,
+    status: "processed",
+    ip,
+    verified,
+    details: `Plano Pro ativado para ${userId}`,
+  });
 
   return NextResponse.json({ received: true, status: "processed" });
 }

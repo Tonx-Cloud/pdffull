@@ -64,6 +64,34 @@ export function AiAnalysisModal({
           ]);
           return;
         }
+
+        // PDFs > 3MB: upload temporário ao Supabase e enviar só URL
+        // (base64 de 3MB ≈ 4MB JSON, perto do limite do Vercel)
+        if (pdfBlob.size > 3 * 1024 * 1024) {
+          try {
+            const { createClient } = await import("@/lib/supabase/client");
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              const tmpName = `ai-tmp/${user.id}/${Date.now()}.pdf`;
+              const { error } = await supabase.storage
+                .from("pdfs")
+                .upload(tmpName, pdfBlob, { contentType: "application/pdf", upsert: true });
+              if (!error) {
+                const { data: urlData } = supabase.storage
+                  .from("pdfs")
+                  .getPublicUrl(tmpName);
+                if (urlData?.publicUrl) {
+                  doAnalysis(null, urlData.publicUrl);
+                  return;
+                }
+              }
+            }
+          } catch {
+            // Fallback: tenta enviar como base64 mesmo
+          }
+        }
+
         const buffer = await pdfBlob.arrayBuffer();
         const bytes = new Uint8Array(buffer);
         let binary = "";
@@ -147,6 +175,44 @@ export function AiAnalysisModal({
       let mime: string;
 
       if (pdfBlob) {
+        // PDFs > 3MB: upload temporário ao Supabase e servir via URL
+        if (pdfBlob.size > 3 * 1024 * 1024) {
+          try {
+            const { createClient } = await import("@/lib/supabase/client");
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              const tmpName = `ai-tmp/${user.id}/${Date.now()}-ocr.pdf`;
+              const { error } = await supabase.storage
+                .from("pdfs")
+                .upload(tmpName, pdfBlob, { contentType: "application/pdf", upsert: true });
+              if (!error) {
+                const { data: urlData } = supabase.storage
+                  .from("pdfs")
+                  .getPublicUrl(tmpName);
+                if (urlData?.publicUrl) {
+                  // Baixar na API para converter a base64 lá
+                  const res = await fetch("/api/ocr", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ pdfUrl: urlData.publicUrl, mimeType: "application/pdf" }),
+                  });
+                  if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    throw new Error(data.error || "Erro no OCR");
+                  }
+                  const data = await res.json();
+                  setOcrText(data.text);
+                  setOcrLoading(false);
+                  return;
+                }
+              }
+            }
+          } catch {
+            // Fallback: tenta enviar como base64 mesmo
+          }
+        }
+
         const buffer = await pdfBlob.arrayBuffer();
         const bytes = new Uint8Array(buffer);
         let binary = "";

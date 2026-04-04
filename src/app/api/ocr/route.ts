@@ -18,12 +18,36 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { imageBase64, mimeType } = body as {
+  const { imageBase64, mimeType, pdfUrl } = body as {
     imageBase64?: string;
     mimeType?: string;
+    pdfUrl?: string;
   };
 
-  if (!imageBase64 || !mimeType) {
+  let finalBase64 = imageBase64;
+  const finalMime = mimeType || "application/pdf";
+
+  // Se recebeu URL em vez de base64, baixar e converter
+  if (!finalBase64 && pdfUrl) {
+    try {
+      const pdfRes = await fetch(pdfUrl);
+      if (!pdfRes.ok) {
+        return NextResponse.json(
+          { error: "Não foi possível acessar o PDF" },
+          { status: 400 }
+        );
+      }
+      const buffer = await pdfRes.arrayBuffer();
+      finalBase64 = Buffer.from(buffer).toString("base64");
+    } catch {
+      return NextResponse.json(
+        { error: "Erro ao baixar o PDF" },
+        { status: 400 }
+      );
+    }
+  }
+
+  if (!finalBase64) {
     return NextResponse.json(
       { error: "Imagem não fornecida" },
       { status: 400 }
@@ -31,7 +55,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Limitar a 10MB de base64
-  if (imageBase64.length > 10 * 1024 * 1024 * 1.37) {
+  if (finalBase64.length > 10 * 1024 * 1024 * 1.37) {
     return NextResponse.json(
       { error: "Imagem muito grande (máximo 10 MB)" },
       { status: 413 }
@@ -41,8 +65,8 @@ export async function POST(request: NextRequest) {
   const parts = [
     {
       inline_data: {
-        mime_type: mimeType,
-        data: imageBase64,
+        mime_type: finalMime,
+        data: finalBase64,
       },
     },
     {

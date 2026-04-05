@@ -1,9 +1,20 @@
 /**
  * Módulo de integração com Mercado Pago Subscriptions.
- * Usa fetch direto para a API REST (mais confiável que o SDK para campos extras).
+ * Usa preapproval_plan (plano de assinatura genérico) + fetch direto na API REST.
+ *
+ * Fluxo:
+ *  1. Cria (ou reutiliza) um preapproval_plan no MP (plano genérico, sem e-mail do pagador)
+ *  2. Obtém o init_point do plano — URL de checkout hospedada pelo MP
+ *  3. Redireciona o usuário para o init_point
+ *  4. O MP cria o preapproval individual quando o usuário conclui o checkout
+ *  5. O MP redireciona de volta para back_url com preapproval_id
+ *  6. Webhook recebe subscription_preapproval para ativar o plano
  */
 
 const MP_API = "https://api.mercadopago.com";
+
+/** ID do plano no MP, cached em memória para evitar criar duplicatas */
+let cachedPlanId: string | null = null;
 
 function getAccessToken(): string {
   const token = (process.env.MP_ACCESS_TOKEN ?? "").trim();
@@ -16,18 +27,24 @@ function getAppUrl(): string {
 }
 
 /**
- * Cria uma assinatura recorrente (preapproval sem plano associado, status pending).
- * O usuário é redirecionado ao init_point do MP para escolher meio de pagamento.
- * Cobranças seguintes são automáticas (R$ 9,90/mês).
+ * Cria um preapproval_plan no Mercado Pago (plano de assinatura recorrente).
+ * Se já existir um plano em cache, reutiliza.
  */
-export async function createSubscription(
-  userId: string,
-  userEmail: string
-): Promise<{ id: string; init_point: string }> {
+async function getOrCreatePlan(): Promise<string> {
+  if (cachedPlanId) {
+    // Verificar se o plano ainda existe no MP
+    const accessToken = getAccessToken();
+    const check = await fetch(`${MP_API}/preapproval_plan/${cachedPlanId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (check.ok) return cachedPlanId;
+    cachedPlanId = null;
+  }
+
   const accessToken = getAccessToken();
   const appUrl = getAppUrl();
 
-  const res = await fetch(`${MP_API}/preapproval`, {
+  const res = await fetch(`${MP_API}/preapproval_plan`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -35,8 +52,6 @@ export async function createSubscription(
     },
     body: JSON.stringify({
       reason: "PDFfULL Pro — Conversões Ilimitadas",
-      external_reference: userId,
-      payer_email: userEmail,
       auto_recurring: {
         frequency: 1,
         frequency_type: "months",
@@ -45,7 +60,6 @@ export async function createSubscription(
       },
       back_url: `${appUrl}/conta?subscription=success`,
       notification_url: `${appUrl}/api/webhooks/mercadopago?source_news=webhooks`,
-      status: "pending",
     }),
   });
 
@@ -55,19 +69,50 @@ export async function createSubscription(
     const msg =
       (data?.cause as Array<{ description?: string }>)?.[0]?.description ??
       data?.message ??
-      "Erro ao criar assinatura no Mercado Pago";
-    console.error("[createSubscription] MP error:", JSON.stringify(data));
+      "Erro ao criar plano de assinatura no Mercado Pago";
+    console.error("[getOrCreatePlan] MP error:", JSON.stringify(data));
     throw new Error(msg);
   }
 
+  cachedPlanId = data.id as string;
+  console.log("[getOrCreatePlan] Plano criado:", cachedPlanId);
+  return cachedPlanId;
+}
+
+/**
+ * Obtém o init_point (URL de checkout) do plano de assinatura.
+ * O usuário é redirecionado para esta URL hospedada pelo MP.
+ * Não precisa de payer_email — o MP coleta no checkout.
+ */
+export async function createSubscription(
+  _userId: string,
+  _userEmail: string
+): Promise<{ id: string; init_point: string }> {
+  const planId = await getOrCreatePlan();
+  const accessToken = getAccessToken();
+
+  // Buscar o init_point do plano
+  const res = await fetch(`${MP_API}/preapproval_plan/${planId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) {
+    console.error("[createSubscription] Erro ao buscar plano:", res.status);
+    cachedPlanId = null;
+    throw new Error("Erro ao obter link de pagamento. Tente novamente.");
+  }
+
+  const data = await res.json();
   const initPoint = data.init_point as string | undefined;
+
   if (!initPoint) {
     console.error("[createSubscription] Sem init_point:", JSON.stringify(data));
+    cachedPlanId = null;
     throw new Error("Link de pagamento indisponível. Tente novamente.");
   }
 
   return {
-    id: data.id as string,
+    id: planId,
     init_point: initPoint,
   };
 }

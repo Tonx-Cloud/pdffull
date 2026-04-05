@@ -1,63 +1,112 @@
-import { MercadoPagoConfig, PreApproval } from "mercadopago";
+/**
+ * Módulo de integração com Mercado Pago Subscriptions.
+ * Usa fetch direto para a API REST (mais confiável que o SDK para campos extras).
+ */
 
-const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN!,
-});
+const MP_API = "https://api.mercadopago.com";
 
-const preApproval = new PreApproval(client);
+function getAccessToken(): string {
+  const token = (process.env.MP_ACCESS_TOKEN ?? "").trim();
+  if (!token) throw new Error("MP_ACCESS_TOKEN não configurado");
+  return token;
+}
+
+function getAppUrl(): string {
+  return (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "");
+}
 
 /**
- * Cria uma assinatura recorrente (PreApproval) no Mercado Pago.
- * Modelo: sem plano associado, pagamento pendente.
- * O usuário é redirecionado ao MP para escolher o meio de pagamento.
+ * Cria uma assinatura recorrente (preapproval sem plano associado, status pending).
+ * O usuário é redirecionado ao init_point do MP para escolher meio de pagamento.
  * Cobranças seguintes são automáticas (R$ 9,90/mês).
  */
 export async function createSubscription(
   userId: string,
   userEmail: string
-) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+): Promise<{ id: string; init_point: string }> {
+  const accessToken = getAccessToken();
+  const appUrl = getAppUrl();
 
-  // notification_url não está na tipagem do SDK, mas é aceito pela API REST
-  // e é obrigatório para assinaturas (não suportado via painel "Suas integrações")
-  const body = {
-    reason: "PDFfULL Pro — Conversões Ilimitadas",
-    external_reference: userId,
-    payer_email: userEmail,
-    auto_recurring: {
-      frequency: 1,
-      frequency_type: "months",
-      transaction_amount: 9.9,
-      currency_id: "BRL",
+  const res = await fetch(`${MP_API}/preapproval`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
     },
-    back_url: `${appUrl}/conta?subscription=success`,
-    notification_url: `${appUrl}/api/webhooks/mercadopago?source_news=webhooks`,
-    status: "pending",
-  };
-
-  const result = await preApproval.create({
-    body: body as Parameters<typeof preApproval.create>[0]["body"],
+    body: JSON.stringify({
+      reason: "PDFfULL Pro — Conversões Ilimitadas",
+      external_reference: userId,
+      payer_email: userEmail,
+      auto_recurring: {
+        frequency: 1,
+        frequency_type: "months",
+        transaction_amount: 9.9,
+        currency_id: "BRL",
+      },
+      back_url: `${appUrl}/conta?subscription=success`,
+      notification_url: `${appUrl}/api/webhooks/mercadopago?source_news=webhooks`,
+      status: "pending",
+    }),
   });
 
+  const data = await res.json();
+
+  if (!res.ok) {
+    const msg =
+      (data?.cause as Array<{ description?: string }>)?.[0]?.description ??
+      data?.message ??
+      "Erro ao criar assinatura no Mercado Pago";
+    console.error("[createSubscription] MP error:", JSON.stringify(data));
+    throw new Error(msg);
+  }
+
+  const initPoint = data.init_point as string | undefined;
+  if (!initPoint) {
+    console.error("[createSubscription] Sem init_point:", JSON.stringify(data));
+    throw new Error("Link de pagamento indisponível. Tente novamente.");
+  }
+
   return {
-    id: result.id!,
-    init_point: result.init_point!,
+    id: data.id as string,
+    init_point: initPoint,
   };
 }
 
 /**
- * Cancela uma assinatura no Mercado Pago.
+ * Cancela uma assinatura no Mercado Pago (PUT /preapproval/{id}).
  */
-export async function cancelSubscription(subscriptionId: string) {
-  return preApproval.update({
-    id: subscriptionId,
-    body: { status: "cancelled" },
+export async function cancelSubscription(subscriptionId: string): Promise<void> {
+  const accessToken = getAccessToken();
+
+  const res = await fetch(`${MP_API}/preapproval/${subscriptionId}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ status: "cancelled" }),
   });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    console.error("[cancelSubscription] Erro MP:", JSON.stringify(err));
+    throw new Error("Erro ao cancelar assinatura no Mercado Pago");
+  }
 }
 
 /**
  * Busca detalhes de uma assinatura no Mercado Pago.
  */
 export async function getSubscription(subscriptionId: string) {
-  return preApproval.get({ id: subscriptionId });
+  const accessToken = getAccessToken();
+
+  const res = await fetch(`${MP_API}/preapproval/${subscriptionId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Erro ao buscar assinatura: ${res.status}`);
+  }
+
+  return res.json();
 }

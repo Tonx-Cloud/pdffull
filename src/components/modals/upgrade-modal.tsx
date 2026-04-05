@@ -26,16 +26,29 @@ export function UpgradeModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleUpgrade = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/checkout", { method: "POST" });
       const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
+
+      if (!res.ok) {
+        setError(data.error || "Erro ao processar pagamento.");
+        return;
       }
+
+      if (!data.url) {
+        setError("Link de pagamento indisponível. Tente novamente.");
+        return;
+      }
+
+      window.location.href = data.url;
     } catch {
+      setError("Erro de conexão. Verifique sua internet e tente novamente.");
+    } finally {
       setLoading(false);
     }
   };
@@ -79,6 +92,12 @@ export function UpgradeModal({
               "Assinar agora"
             )}
           </Button>
+
+          {error && (
+            <p className="text-sm text-center text-red-600 font-medium">
+              {error}
+            </p>
+          )}
 
           <p className="text-xs text-center text-muted-foreground">
             Pagamento seguro via Mercado Pago. Cancele quando quiser.

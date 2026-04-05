@@ -35,12 +35,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { init_point } = await createSubscription(
-    user.id,
-    user.email!
-  );
+  try {
+    const { init_point } = await createSubscription(
+      user.id,
+      user.email!
+    );
 
-  return NextResponse.json({ url: init_point });
+    return NextResponse.json({ url: init_point });
+  } catch (err) {
+    console.error("[checkout POST]", err);
+    const message = err instanceof Error ? err.message : "Erro ao criar assinatura";
+    return NextResponse.json({ error: message }, { status: 502 });
+  }
 }
 
 // GET para redirect direto (usado pelo botão de upgrade)
@@ -54,10 +60,17 @@ export async function GET() {
     return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
   }
 
-  const { init_point } = await createSubscription(
-    user.id,
-    user.email!
-  );
+  try {
+    const { init_point } = await createSubscription(
+      user.id,
+      user.email!
+    );
 
-  return NextResponse.redirect(init_point);
+    return NextResponse.redirect(init_point);
+  } catch (err) {
+    console.error("[checkout GET]", err);
+    return NextResponse.redirect(
+      new URL("/conta?subscription=error", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000")
+    );
+  }
 }

@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Check, Loader2, Zap } from "lucide-react";
+import { Check, ExternalLink, Loader2, ShieldCheck, X, Zap } from "lucide-react";
 
 const PRO_BENEFITS = [
   "Conversões ilimitadas",
@@ -18,6 +11,8 @@ const PRO_BENEFITS = [
   "Suporte prioritário",
 ];
 
+type Phase = "confirm" | "loading" | "error";
+
 export function UpgradeModal({
   open,
   onOpenChange,
@@ -25,49 +20,85 @@ export function UpgradeModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [phase, setPhase] = useState<Phase>("confirm");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleUpgrade = async () => {
-    setLoading(true);
-    setError(null);
+  if (!open) return null;
+
+  const handleClose = () => {
+    if (phase !== "loading") {
+      setPhase("confirm");
+      setErrorMsg("");
+      onOpenChange(false);
+    }
+  };
+
+  const handleCheckout = async () => {
+    setPhase("loading");
+    setErrorMsg("");
     try {
       const res = await fetch("/api/checkout", { method: "POST" });
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Erro ao processar pagamento.");
-        return;
+        throw new Error(data.error || "Erro ao processar pagamento.");
       }
 
       if (!data.url) {
-        setError("Link de pagamento indisponível. Tente novamente.");
-        return;
+        throw new Error("Link de pagamento indisponível. Tente novamente.");
       }
 
       window.location.href = data.url;
-    } catch {
-      setError("Erro de conexão. Verifique sua internet e tente novamente.");
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      setPhase("error");
+      setErrorMsg(err instanceof Error ? err.message : "Erro inesperado. Tente novamente.");
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-blue-600" />
-            Upgrade para Pro
-          </DialogTitle>
-          <DialogDescription>
-            Desbloqueie conversões ilimitadas por apenas R$ 9,90/mês
-          </DialogDescription>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
+      <div className="relative my-8 w-full max-w-md rounded-2xl bg-background shadow-2xl ring-1 ring-border">
+        {/* Cabeçalho */}
+        <div className="flex items-start justify-between border-b px-6 py-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Assinar plano
+            </p>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Zap className="h-5 w-5 text-blue-600" />
+              PDFfULL Pro
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              R$ 9,90/mês · Cancele quando quiser
+            </p>
+          </div>
+          <button
+            onClick={handleClose}
+            disabled={phase === "loading"}
+            className="ml-4 mt-0.5 rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+            aria-label="Fechar"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
-        <div className="space-y-4 py-4">
-          <ul className="space-y-3">
+        {/* Corpo */}
+        <div className="px-6 py-5 space-y-4">
+          {/* Erro */}
+          {phase === "error" && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3">
+              <p className="text-sm font-medium text-destructive">{errorMsg}</p>
+              <button
+                onClick={() => setPhase("confirm")}
+                className="mt-1 text-xs text-destructive/70 underline hover:text-destructive"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          )}
+
+          {/* Benefícios */}
+          <ul className="space-y-2">
             {PRO_BENEFITS.map((benefit) => (
               <li key={benefit} className="flex items-center gap-3 text-sm">
                 <Check className="h-4 w-4 text-green-600 shrink-0" />
@@ -76,34 +107,49 @@ export function UpgradeModal({
             ))}
           </ul>
 
-          <div className="rounded-lg bg-blue-50 p-4 text-center">
-            <span className="text-3xl font-bold text-blue-600">R$ 9,90</span>
-            <span className="text-muted-foreground">/mês</span>
+          {/* Informação de redirecionamento */}
+          <p className="text-sm text-muted-foreground">
+            Você será redirecionado para o ambiente seguro do Mercado Pago para
+            inserir os dados do cartão e confirmar a assinatura.
+          </p>
+
+          {/* Resumo */}
+          <div className="rounded-lg border bg-muted/50 px-4 py-3 text-sm space-y-1.5">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Plano</span>
+              <span className="font-medium">PDFfULL Pro</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Valor</span>
+              <span className="font-medium">R$ 9,90/mês</span>
+            </div>
           </div>
 
+          {/* Botão principal */}
           <Button
-            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-base"
-            onClick={handleUpgrade}
-            disabled={loading}
+            className="w-full h-12 gap-2 bg-blue-600 hover:bg-blue-700 text-base"
+            onClick={handleCheckout}
+            disabled={phase === "loading"}
           >
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+            {phase === "loading" ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Preparando pagamento...
+              </>
             ) : (
-              "Assinar agora"
+              <>
+                <ExternalLink className="h-4 w-4" />
+                Ir para o Mercado Pago
+              </>
             )}
           </Button>
 
-          {error && (
-            <p className="text-sm text-center text-red-600 font-medium">
-              {error}
-            </p>
-          )}
-
-          <p className="text-xs text-center text-muted-foreground">
-            Pagamento seguro via Mercado Pago. Cancele quando quiser.
-          </p>
+          <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span>Pagamento processado com segurança pelo Mercado Pago</span>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

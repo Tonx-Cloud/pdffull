@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createCheckoutPreference } from "@/lib/mercadopago/checkout";
+import { createSubscription } from "@/lib/mercadopago/checkout";
 import { rateLimit, getClientIp } from "@/lib/security";
 
 export async function POST(request: NextRequest) {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { init_point } = await createCheckoutPreference(
+  const { init_point } = await createSubscription(
     user.id,
     user.email!
   );
@@ -54,7 +54,7 @@ export async function GET() {
     return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
   }
 
-  const { init_point } = await createCheckoutPreference(
+  const { init_point } = await createSubscription(
     user.id,
     user.email!
   );

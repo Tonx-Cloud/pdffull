@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MercadoPagoConfig, Payment } from "mercadopago";
+import { MercadoPagoConfig, Payment, PreApproval } from "mercadopago";
 import { createClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
 import { sendUpgradeEmail } from "@/lib/email/resend";
@@ -11,11 +11,10 @@ function getSupabaseAdmin() {
   );
 }
 
-function getMpPaymentApi() {
-  const mpClient = new MercadoPagoConfig({
+function getMpClient() {
+  return new MercadoPagoConfig({
     accessToken: process.env.MP_ACCESS_TOKEN!,
   });
-  return new Payment(mpClient);
 }
 
 function verifyWebhookSignature(
@@ -85,6 +84,7 @@ export async function POST(request: NextRequest) {
   }
 
   const dataId = String((body.data as Record<string, unknown>)?.id || "");
+  const eventType = String(body.type || "unknown");
 
   // Verificar assinatura HMAC se MP_WEBHOOK_SECRET estiver configurado
   const hasSecret = !!process.env.MP_WEBHOOK_SECRET;
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
 
   if (hasSecret && !verified) {
     await logWebhookAttempt(supabase, {
-      event_type: String(body.type || "unknown"),
+      event_type: eventType,
       payment_id: dataId || null,
       status: "rejected",
       ip,
@@ -102,21 +102,156 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Mercado Pago envia notificações com type e data.id
-  if (body.type !== "payment" || !dataId) {
+  // Rotear por tipo de evento
+  if (eventType === "subscription_preapproval" && dataId) {
+    return handleSubscriptionEvent(supabase, dataId, ip, verified);
+  }
+
+  if (eventType === "payment" && dataId) {
+    return handlePaymentEvent(supabase, dataId, ip, verified);
+  }
+
+  // Evento não tratado — aceitar silenciosamente
+  await logWebhookAttempt(supabase, {
+    event_type: eventType,
+    payment_id: dataId || null,
+    status: "ignored",
+    ip,
+    verified,
+    details: `Tipo '${eventType}' não tratado`,
+  });
+  return NextResponse.json({ received: true });
+}
+
+/**
+ * Trata eventos de assinatura (subscription_preapproval).
+ * Quando a assinatura é autorizada, ativa o plano Pro.
+ * Quando cancelada/pausada, reverte para Free.
+ */
+async function handleSubscriptionEvent(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  subscriptionId: string,
+  ip: string | null,
+  verified: boolean
+) {
+  const mpClient = getMpClient();
+  const preApprovalApi = new PreApproval(mpClient);
+
+  let subscription;
+  try {
+    subscription = await preApprovalApi.get({ id: subscriptionId });
+  } catch (err) {
     await logWebhookAttempt(supabase, {
-      event_type: String(body.type || "unknown"),
-      payment_id: dataId || null,
+      event_type: "subscription_preapproval",
+      payment_id: subscriptionId,
+      status: "error",
+      ip,
+      verified,
+      details: `Erro ao buscar assinatura: ${err instanceof Error ? err.message : "unknown"}`,
+    });
+    return NextResponse.json({ error: "Subscription fetch failed" }, { status: 500 });
+  }
+
+  const userId = subscription.external_reference;
+  if (!userId) {
+    await logWebhookAttempt(supabase, {
+      event_type: "subscription_preapproval",
+      payment_id: subscriptionId,
+      status: "error",
+      ip,
+      verified,
+      details: "external_reference (user_id) ausente",
+    });
+    return NextResponse.json({ error: "user_id missing" }, { status: 400 });
+  }
+
+  const mpStatus = subscription.status; // authorized, pending, paused, cancelled
+
+  if (mpStatus === "authorized") {
+    // Ativar plano Pro
+    await supabase.from("subscriptions").upsert(
+      {
+        user_id: userId,
+        mp_subscription_id: subscriptionId,
+        plan: "pro",
+        status: "active",
+        current_period_start: new Date().toISOString(),
+        current_period_end: new Date(
+          Date.now() + 30 * 24 * 60 * 60 * 1000
+        ).toISOString(),
+      },
+      { onConflict: "user_id" }
+    );
+
+    await supabase.from("profiles").update({ plan: "pro" }).eq("id", userId);
+
+    // Enviar email de upgrade
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("email, name")
+      .eq("id", userId)
+      .single();
+    if (profileData?.email) {
+      sendUpgradeEmail(
+        profileData.email,
+        profileData.name || profileData.email.split("@")[0]
+      ).catch(() => {});
+    }
+
+    await logWebhookAttempt(supabase, {
+      event_type: "subscription_preapproval",
+      payment_id: subscriptionId,
+      status: "processed",
+      ip,
+      verified,
+      details: `Assinatura autorizada → Plano Pro ativado para ${userId}`,
+    });
+  } else if (mpStatus === "cancelled" || mpStatus === "paused") {
+    // Desativar plano
+    await supabase
+      .from("subscriptions")
+      .update({ status: "cancelled" })
+      .eq("user_id", userId)
+      .eq("status", "active");
+
+    await supabase.from("profiles").update({ plan: "free" }).eq("id", userId);
+
+    await logWebhookAttempt(supabase, {
+      event_type: "subscription_preapproval",
+      payment_id: subscriptionId,
+      status: "processed",
+      ip,
+      verified,
+      details: `Assinatura ${mpStatus} → Plano Free para ${userId}`,
+    });
+  } else {
+    await logWebhookAttempt(supabase, {
+      event_type: "subscription_preapproval",
+      payment_id: subscriptionId,
       status: "ignored",
       ip,
       verified,
-      details: "Tipo não é payment ou sem data.id",
+      details: `Status da assinatura: ${mpStatus}`,
     });
-    return NextResponse.json({ received: true });
   }
 
-  const paymentId = Number(dataId);
-  const paymentApi = getMpPaymentApi();
+  return NextResponse.json({ received: true, status: "processed" });
+}
+
+/**
+ * Trata eventos de pagamento individual.
+ * Cada cobrança recorrente da assinatura gera um evento payment.
+ * Quando aprovado, garante que o plano Pro está ativo e renova o período.
+ */
+async function handlePaymentEvent(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  paymentIdStr: string,
+  ip: string | null,
+  verified: boolean
+) {
+  const paymentId = Number(paymentIdStr);
+  const mpClient = getMpClient();
+  const paymentApi = new Payment(mpClient);
 
   let payment;
   try {
@@ -124,7 +259,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     await logWebhookAttempt(supabase, {
       event_type: "payment",
-      payment_id: dataId,
+      payment_id: paymentIdStr,
       status: "error",
       ip,
       verified,
@@ -136,7 +271,7 @@ export async function POST(request: NextRequest) {
   if (!payment || payment.status !== "approved") {
     await logWebhookAttempt(supabase, {
       event_type: "payment",
-      payment_id: dataId,
+      payment_id: paymentIdStr,
       status: "ignored",
       ip,
       verified,
@@ -145,20 +280,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  const userId = payment.metadata?.user_id;
+  // Identificar o usuário via metadata ou external_reference
+  const userId =
+    payment.metadata?.user_id || payment.external_reference || null;
+
   if (!userId) {
     await logWebhookAttempt(supabase, {
       event_type: "payment",
-      payment_id: dataId,
+      payment_id: paymentIdStr,
       status: "error",
       ip,
       verified,
-      details: "user_id ausente no metadata",
+      details: "user_id ausente no metadata e external_reference",
     });
     return NextResponse.json({ error: "user_id missing" }, { status: 400 });
   }
 
-  // Criar/atualizar assinatura
+  // Renovar período da assinatura
   const { error: subError } = await supabase.from("subscriptions").upsert(
     {
       user_id: userId,
@@ -167,7 +305,7 @@ export async function POST(request: NextRequest) {
       status: "active",
       current_period_start: new Date().toISOString(),
       current_period_end: new Date(
-        new Date().setMonth(new Date().getMonth() + 1)
+        Date.now() + 30 * 24 * 60 * 60 * 1000
       ).toISOString(),
     },
     { onConflict: "user_id" }
@@ -177,36 +315,16 @@ export async function POST(request: NextRequest) {
     console.error("Webhook MP: erro ao salvar subscription:", subError);
   }
 
-  // Atualizar plano do perfil
-  const { error: profileError } = await supabase
-    .from("profiles")
-    .update({ plan: "pro" })
-    .eq("id", userId);
-
-  if (profileError) {
-    console.error("Webhook MP: erro ao atualizar profile:", profileError);
-  }
-
-  // Enviar email de upgrade
-  const { data: profileData } = await supabase
-    .from("profiles")
-    .select("email, name")
-    .eq("id", userId)
-    .single();
-  if (profileData?.email) {
-    sendUpgradeEmail(
-      profileData.email,
-      profileData.name || profileData.email.split("@")[0]
-    ).catch(() => {});
-  }
+  // Garantir plano Pro ativo
+  await supabase.from("profiles").update({ plan: "pro" }).eq("id", userId);
 
   await logWebhookAttempt(supabase, {
     event_type: "payment",
-    payment_id: dataId,
+    payment_id: paymentIdStr,
     status: "processed",
     ip,
     verified,
-    details: `Plano Pro ativado para ${userId}`,
+    details: `Pagamento aprovado → período renovado para ${userId}`,
   });
 
   return NextResponse.json({ received: true, status: "processed" });

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { cancelSubscription } from "@/lib/mercadopago/checkout";
 
 export async function POST() {
   const supabase = await createClient();
@@ -11,7 +12,25 @@ export async function POST() {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  // Atualizar status da assinatura
+  // Buscar assinatura ativa com o ID do MP
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("mp_subscription_id")
+    .eq("user_id", user.id)
+    .eq("status", "active")
+    .single();
+
+  // Cancelar no Mercado Pago (se tiver ID da assinatura)
+  if (sub?.mp_subscription_id) {
+    try {
+      await cancelSubscription(sub.mp_subscription_id);
+    } catch (err) {
+      console.error("Erro ao cancelar no MP:", err);
+      // Prosseguir com cancelamento local mesmo se falhar no MP
+    }
+  }
+
+  // Atualizar status da assinatura no banco
   const { error: subError } = await supabase
     .from("subscriptions")
     .update({ status: "cancelled" })

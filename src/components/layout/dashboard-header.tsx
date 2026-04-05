@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
-import { PwaInstallButton } from "@/components/pwa-install-button";
-import { LanguageSelector } from "@/components/language-selector";
+import { PwaInstallButton } from "@/components/pwa/pwa-install-button";
+import { LanguageSelector } from "@/components/layout/language-selector";
 import { Menu, X } from "lucide-react";
 
 export function DashboardHeader() {

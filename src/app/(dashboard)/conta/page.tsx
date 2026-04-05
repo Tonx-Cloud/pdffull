@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import type { Profile } from "@/types";
-import { ContaActions } from "@/components/conta-actions";
+import { ContaActions } from "@/components/account/conta-actions";
 
 export default async function ContaPage() {
   const supabase = await createClient();

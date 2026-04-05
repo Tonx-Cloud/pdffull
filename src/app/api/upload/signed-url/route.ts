@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { z } from "zod";
+
+const signedUrlSchema = z.object({
+  filename: z.string().max(200).default("documento.pdf"),
+});
 
 function sanitizeFilename(name: string): string {
   return name
@@ -19,9 +24,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const rawFilename = body.filename || "documento.pdf";
-  const filename = sanitizeFilename(rawFilename);
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
+
+  const parsed = signedUrlSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
+  }
+
+  const filename = sanitizeFilename(parsed.data.filename);
   const storageKey = `pdfs/${Date.now()}-${filename}`;
 
   // Usar service_role para gerar signed URL (bypass RLS)

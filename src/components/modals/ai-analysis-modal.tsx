@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Send, Loader2, User, Bot, ScanText } from "lucide-react";
-import { MarkdownEditorModal } from "@/components/markdown-editor-modal";
+import { MarkdownEditorModal } from "@/components/modals/markdown-editor-modal";
 import { toast } from "sonner";
 
 interface Message {

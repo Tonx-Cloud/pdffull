@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { rateLimit, getClientIp } from "@/lib/security";
+import { sanitizeAiOutput } from "@/lib/security";
 
 const GEMINI_MODEL = "gemini-2.0-flash";
+
+const ocrSchema = z.object({
+  imageBase64: z.string().optional(),
+  mimeType: z.string().optional(),
+  pdfUrl: z.string().url().optional(),
+});
 
 function getGeminiUrl(): string | null {
   const key = process.env.GEMINI_API_KEY?.trim();
@@ -9,6 +18,15 @@ function getGeminiUrl(): string | null {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 20 req/min por IP
+  const ip = getClientIp(request.headers);
+  if (!rateLimit(ip, 20, 60_000)) {
+    return NextResponse.json(
+      { error: "Muitas requisições. Tente novamente em 1 minuto." },
+      { status: 429 }
+    );
+  }
+
   const geminiUrl = getGeminiUrl();
   if (!geminiUrl) {
     return NextResponse.json(
@@ -17,12 +35,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
-  const { imageBase64, mimeType, pdfUrl } = body as {
-    imageBase64?: string;
-    mimeType?: string;
-    pdfUrl?: string;
-  };
+  let rawBody: unknown;
+  try {
+    rawBody = await request.json();
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
+
+  const parsed = ocrSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Dados inválidos", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const { imageBase64, mimeType, pdfUrl } = parsed.data;
 
   let finalBase64 = imageBase64;
   const finalMime = mimeType || "application/pdf";
@@ -105,8 +133,9 @@ Retorne APENAS o texto extraído em formato Markdown, sem comentários adicionai
     }
 
     const data = await geminiRes.json();
-    const text =
+    const rawText =
       data.candidates?.[0]?.content?.parts?.[0]?.text || "[Sem texto detectado]";
+    const text = sanitizeAiOutput(rawText);
 
     return NextResponse.json({ text });
   } catch (e) {

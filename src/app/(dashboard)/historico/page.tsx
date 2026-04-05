@@ -20,17 +20,17 @@ import {
 } from "lucide-react";
 import { PDFDocument } from "pdf-lib";
 import { Button } from "@/components/ui/button";
-import { ShareMenu } from "@/components/share-menu";
+import { ShareMenu } from "@/components/pwa/share-menu";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 const AiAnalysisModal = dynamic(
-  () => import("@/components/ai-analysis-modal").then((m) => m.AiAnalysisModal),
+  () => import("@/components/modals/ai-analysis-modal").then((m) => m.AiAnalysisModal),
   { ssr: false }
 );
 
 const PdfViewerModal = dynamic(
-  () => import("@/components/pdf-viewer-modal").then((m) => m.PdfViewerModal),
+  () => import("@/components/modals/pdf-viewer-modal").then((m) => m.PdfViewerModal),
   { ssr: false }
 );
 

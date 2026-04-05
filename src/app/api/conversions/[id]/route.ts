@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { z } from "zod";
+
+const renameSchema = z.object({
+  filename: z.string().trim().min(1).max(200),
+});
 
 export async function PATCH(
   request: NextRequest,
@@ -15,12 +20,19 @@ export async function PATCH(
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const filename = typeof body.filename === "string" ? body.filename.trim() : "";
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
 
-  if (!filename || filename.length > 200) {
+  const parsed = renameSchema.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json({ error: "Nome inválido" }, { status: 400 });
   }
+
+  const { filename } = parsed.data;
 
   const { error } = await supabase
     .from("conversions")

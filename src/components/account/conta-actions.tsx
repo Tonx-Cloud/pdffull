@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UpgradeModal } from "@/components/upgrade-modal";
+import { UpgradeModal } from "@/components/modals/upgrade-modal";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 

@@ -1,5 +1,5 @@
-import { TermsAcceptanceModal } from "@/components/terms-acceptance-modal";
-import { DashboardHeader } from "@/components/dashboard-header";
+import { TermsAcceptanceModal } from "@/components/modals/terms-acceptance-modal";
+import { DashboardHeader } from "@/components/layout/dashboard-header";
 
 export default function DashboardLayout({
   children,

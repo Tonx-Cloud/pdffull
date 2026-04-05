@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { z } from "zod";
+import { rateLimit, getClientIp } from "@/lib/security";
+import { sanitizeUserPrompt, sanitizeAiOutput } from "@/lib/security";
 
 const GEMINI_MODEL = "gemini-2.0-flash";
+
+const analyzeSchema = z.object({
+  pdfBase64: z.string().optional(),
+  pdfUrl: z.string().url().optional(),
+  messages: z
+    .array(z.object({ role: z.string(), text: z.string().max(4000) }))
+    .optional(),
+});
 
 function getGeminiUrl(): string | null {
   const key = process.env.GEMINI_API_KEY?.trim();
@@ -10,6 +21,15 @@ function getGeminiUrl(): string | null {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 20 req/min por IP
+  const ip = getClientIp(request.headers);
+  if (!rateLimit(ip, 20, 60_000)) {
+    return NextResponse.json(
+      { error: "Muitas requisições. Tente novamente em 1 minuto." },
+      { status: 429 }
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -27,12 +47,31 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
-  const { pdfBase64, pdfUrl, messages } = body as {
-    pdfBase64?: string;
-    pdfUrl?: string;
-    messages?: Array<{ role: string; text: string }>;
-  };
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
+  }
+
+  const parsed = analyzeSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Dados inválidos", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const { pdfBase64, pdfUrl, messages } = parsed.data;
+
+  // Sanitizar texto de mensagens do usuário
+  if (messages) {
+    for (const msg of messages) {
+      if (msg.role === "user") {
+        msg.text = sanitizeUserPrompt(msg.text);
+      }
+    }
+  }
 
   // Construir partes do conteúdo
   const parts: Array<Record<string, unknown>> = [];
@@ -132,9 +171,10 @@ Seja conciso mas informativo. Se o PDF contiver imagens de texto (scan/foto), te
     }
 
     const data = await geminiRes.json();
-    const text =
+    const rawText =
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
       "Não foi possível gerar análise.";
+    const text = sanitizeAiOutput(rawText);
 
     return NextResponse.json({ analysis: text });
   } catch (e) {

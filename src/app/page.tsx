@@ -1,9 +1,9 @@
 import { FileText, Camera, Zap, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { PwaInstallButton } from "@/components/pwa-install-button";
-import { PwaShareButton } from "@/components/pwa-share-button";
-import { LanguageSelector } from "@/components/language-selector";
+import { PwaInstallButton } from "@/components/pwa/pwa-install-button";
+import { PwaShareButton } from "@/components/pwa/pwa-share-button";
+import { LanguageSelector } from "@/components/layout/language-selector";
 
 export default function Home() {
   return (

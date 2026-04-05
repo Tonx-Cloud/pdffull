@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { CameraCapture } from "@/components/camera-capture";
-import { ImageList } from "@/components/image-list";
-import { PdfResult } from "@/components/pdf-result";
+import { CameraCapture } from "@/components/converter/camera-capture";
+import { ImageList } from "@/components/converter/image-list";
+import { PdfResult } from "@/components/converter/pdf-result";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { FileText, Loader2, AlertTriangle } from "lucide-react";
 import { compressImages } from "@/lib/pdf/compress";
 import { generatePdf, getPdfFilename } from "@/lib/pdf/generate";
 import { useConversionLimit } from "@/hooks/use-conversion-limit";
-import { UpgradeModal } from "@/components/upgrade-modal";
+import { UpgradeModal } from "@/components/modals/upgrade-modal";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 

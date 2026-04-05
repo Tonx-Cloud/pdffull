@@ -1,8 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createCheckoutPreference } from "@/lib/mercadopago/checkout";
+import { rateLimit, getClientIp } from "@/lib/security";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const ip = getClientIp(request.headers);
+  if (!rateLimit(ip, 10, 60_000)) {
+    return NextResponse.json(
+      { error: "Muitas requisições. Tente novamente em 1 minuto." },
+      { status: 429 }
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

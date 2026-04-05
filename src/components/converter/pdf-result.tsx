@@ -4,17 +4,17 @@ import dynamic from "next/dynamic";
 import { Download, RotateCcw, Sparkles, UserPlus, Pencil, Check, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShareMenu } from "@/components/share-menu";
+import { ShareMenu } from "@/components/pwa/share-menu";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 const AiAnalysisModal = dynamic(
-  () => import("@/components/ai-analysis-modal").then((m) => m.AiAnalysisModal),
+  () => import("@/components/modals/ai-analysis-modal").then((m) => m.AiAnalysisModal),
   { ssr: false }
 );
 
 const PdfViewerModal = dynamic(
-  () => import("@/components/pdf-viewer-modal").then((m) => m.PdfViewerModal),
+  () => import("@/components/modals/pdf-viewer-modal").then((m) => m.PdfViewerModal),
   { ssr: false }
 );
 

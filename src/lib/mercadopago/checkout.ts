@@ -80,39 +80,63 @@ async function getOrCreatePlan(): Promise<string> {
 }
 
 /**
- * Obtém o init_point (URL de checkout) do plano de assinatura.
- * O usuário é redirecionado para esta URL hospedada pelo MP.
- * Não precisa de payer_email — o MP coleta no checkout.
+ * Cria uma assinatura individual (preapproval) para o usuário,
+ * vinculada ao plano genérico, com external_reference = userId.
+ * O MP gera um init_point exclusivo para essa assinatura.
  */
 export async function createSubscription(
-  _userId: string,
-  _userEmail: string
+  userId: string,
+  userEmail: string
 ): Promise<{ id: string; init_point: string }> {
   const planId = await getOrCreatePlan();
   const accessToken = getAccessToken();
+  const appUrl = getAppUrl();
 
-  // Buscar o init_point do plano
-  const res = await fetch(`${MP_API}/preapproval_plan/${planId}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+  // Criar preapproval individual com external_reference = userId
+  const res = await fetch(`${MP_API}/preapproval`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      preapproval_plan_id: planId,
+      payer_email: userEmail,
+      external_reference: userId,
+      back_url: `${appUrl}/conta?subscription=success`,
+      reason: "PDFfULL Pro — Conversões Ilimitadas",
+      status: "pending",
+    }),
   });
 
+  const data = await res.json();
+
   if (!res.ok) {
-    console.error("[createSubscription] Erro ao buscar plano:", res.status);
-    cachedPlanId = null;
-    throw new Error("Erro ao obter link de pagamento. Tente novamente.");
+    const msg =
+      (data?.cause as Array<{ description?: string }>)?.[0]?.description ??
+      data?.message ??
+      "Erro ao criar assinatura no Mercado Pago";
+    console.error("[createSubscription] MP error:", JSON.stringify(data));
+    // Limpar cache do plano se for erro de plano inválido
+    if (res.status === 404 || res.status === 400) {
+      cachedPlanId = null;
+    }
+    throw new Error(msg);
   }
 
-  const data = await res.json();
   const initPoint = data.init_point as string | undefined;
 
   if (!initPoint) {
     console.error("[createSubscription] Sem init_point:", JSON.stringify(data));
-    cachedPlanId = null;
     throw new Error("Link de pagamento indisponível. Tente novamente.");
   }
 
+  console.log(
+    `[createSubscription] Assinatura criada: ${data.id} para user ${userId}`
+  );
+
   return {
-    id: planId,
+    id: data.id as string,
     init_point: initPoint,
   };
 }

@@ -152,7 +152,23 @@ async function handleSubscriptionEvent(
     return NextResponse.json({ error: "Subscription fetch failed" }, { status: 500 });
   }
 
-  const userId = subscription.external_reference;
+  let userId = subscription.external_reference;
+
+  // Fallback: se external_reference estiver ausente, buscar user pelo payer_email
+  if (!userId && subscription.payer_email) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", subscription.payer_email)
+      .single();
+    if (profile) {
+      userId = profile.id;
+      console.log(
+        `[webhook] external_reference ausente, user encontrado por email: ${subscription.payer_email} → ${userId}`
+      );
+    }
+  }
+
   if (!userId) {
     await logWebhookAttempt(supabase, {
       event_type: "subscription_preapproval",
@@ -160,7 +176,7 @@ async function handleSubscriptionEvent(
       status: "error",
       ip,
       verified,
-      details: "external_reference (user_id) ausente",
+      details: `external_reference ausente e payer_email (${subscription.payer_email || "null"}) não encontrado`,
     });
     return NextResponse.json({ error: "user_id missing" }, { status: 400 });
   }
@@ -280,9 +296,24 @@ async function handlePaymentEvent(
     return NextResponse.json({ received: true });
   }
 
-  // Identificar o usuário via metadata ou external_reference
-  const userId =
+  // Identificar o usuário via metadata, external_reference ou payer_email
+  let userId =
     payment.metadata?.user_id || payment.external_reference || null;
+
+  // Fallback: buscar user pelo payer_email se disponível
+  if (!userId && payment.payer?.email) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", payment.payer.email)
+      .single();
+    if (profile) {
+      userId = profile.id;
+      console.log(
+        `[webhook payment] user encontrado por payer.email: ${payment.payer.email} → ${userId}`
+      );
+    }
+  }
 
   if (!userId) {
     await logWebhookAttempt(supabase, {

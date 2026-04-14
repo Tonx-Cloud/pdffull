@@ -39,7 +39,8 @@
 | **FASE 11** | 7 | ✅ | UX Bugs, Merge PDFs, Hamburger, i18n |
 | **FASE 12** | 4 | ✅ | Domínio Customizado (pdf-full.com) |
 | **FASE 13** | 3 | ✅ | Testes E2E Produção (Playwright) |
-| **TOTAL** | **95** | ✅ | Do setup ao lançamento |
+| **FASE 14** | 4 | 🔄 | File Handler & Share Target (Leitor PDF Android) |
+| **TOTAL** | **99** | 🔄 | Do setup ao lançamento |
 
 ---
 
@@ -312,6 +313,21 @@
 | 13.1 | ✅ | **Suite E2E produção** — 50 testes em `tests/production-e2e.spec.ts` cobrindo: Landing (hero, header, features, planos, footer, i18n selector), Login (form, OAuth, magic link, links), Register (checkbox termos, habilitação botões, links), Converter anônimo, Rotas protegidas (redirect /login), FAQ (seções, accordions), Sobre, Termos, Privacidade (LGPD), Fluxos multi-page, Domínio/SSL/headers, Mobile hamburger |
 | 13.2 | ✅ | **Config produção Playwright** — `playwright.production.config.ts` sem webServer, baseURL `https://www.pdf-full.com`, 3 workers, retry 1 |
 | 13.3 | ✅ | **Resultado: 50/50 passed** — 16.2s, zero flaky, cobertura: 13 describe blocks, 12 páginas/fluxos testados |
+
+---
+
+## FASE 14 — File Handler & Share Target (Leitor PDF Android)
+
+> **Objetivo:** Registrar o PWA como manipulador de arquivos PDF no Android, permitindo "Abrir com..." e receber PDFs compartilhados  
+> **Pré-requisito:** Fase 13 concluída (app estável em produção)  
+> **Entrega:** PDFfULL aparece no menu "Abrir com..." e no "Compartilhar" do Android para arquivos PDF
+
+| # | Tarefa | Detalhes | Status |
+|---|--------|----------|:------:|
+| 14.1 | 🔄 | **File Handling API no manifest.json** — Declarar `file_handlers` com `action: "/converter"`, accept `application/pdf` e `.pdf`. `launch_type: "single-client"` para reutilizar janela existente |
+| 14.2 | 🔄 | **Web Share Target no manifest.json** — Declarar `share_target` com `action: "/converter"`, method POST, enctype multipart/form-data, params.files aceita `application/pdf` e `.pdf` |
+| 14.3 | 🔄 | **Service Worker Share Handler** — Interceptar POST em `/converter` no SW, extrair arquivo PDF do FormData, armazenar no Cache API (`shared-files`), redirecionar para `/converter?shared=1` |
+| 14.4 | 🔄 | **Hook useSharedFile** — Hook React que: (1) escuta `launchQueue` do File Handling API, (2) verifica Cache API por arquivos compartilhados. Retorna `File[]` para o converter processar automaticamente |
 
 ---
 

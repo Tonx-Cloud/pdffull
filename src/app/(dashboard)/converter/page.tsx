@@ -10,6 +10,7 @@ import { FileText, Loader2, AlertTriangle } from "lucide-react";
 import { compressImages } from "@/lib/pdf/compress";
 import { generatePdf, getPdfFilename } from "@/lib/pdf/generate";
 import { useConversionLimit } from "@/hooks/use-conversion-limit";
+import { useSharedFile } from "@/hooks/use-shared-file";
 import { UpgradeModal } from "@/components/modals/upgrade-modal";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
@@ -26,6 +27,19 @@ export default function ConverterPage() {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const limit = useConversionLimit();
+  const { sharedFiles, clearSharedFiles } = useSharedFile();
+
+  // Quando receber PDF via File Handler ou Share Target, exibir como resultado
+  useEffect(() => {
+    if (sharedFiles.length === 0) return;
+
+    const pdfFile = sharedFiles[0];
+    setPdfBlob(pdfFile);
+    setPdfFilename(pdfFile.name);
+    setStage("done");
+    clearSharedFiles();
+    toast.success("PDF recebido!");
+  }, [sharedFiles, clearSharedFiles]);
 
   // Verificar se está logado
   useEffect(() => {
@@ -164,7 +178,7 @@ export default function ConverterPage() {
         <PdfResult
           pdfBlob={pdfBlob}
           filename={pdfFilename}
-          pageCount={images.length}
+          pageCount={images.length || 1}
           onReset={handleReset}
           isAnon={!isLoggedIn}
         />

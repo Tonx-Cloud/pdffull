@@ -1,4 +1,5 @@
 const CACHE_NAME = "pdffull-v2";
+const SHARED_FILES_CACHE = "shared-files";
 const STATIC_ASSETS = ["/manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -12,7 +13,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.filter((key) => key !== CACHE_NAME && key !== SHARED_FILES_CACHE).map((key) => caches.delete(key))
       )
     )
   );
@@ -21,6 +22,12 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
+
+  // Interceptar POST do Web Share Target em /converter
+  if (url.pathname === "/converter" && event.request.method === "POST") {
+    event.respondWith(handleShareTarget(event.request));
+    return;
+  }
 
   // Ignorar requisições de API, auth e extensões do browser
   if (
@@ -89,3 +96,30 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(event.request))
   );
 });
+
+// Handler para Web Share Target — recebe PDF compartilhado via POST
+async function handleShareTarget(request) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file");
+
+    if (file && file instanceof File && file.type === "application/pdf") {
+      // Armazenar o arquivo no Cache API para o client-side consumir
+      const cache = await caches.open(SHARED_FILES_CACHE);
+      // Criar uma Response com o arquivo para armazenar no cache
+      const response = new Response(file, {
+        headers: {
+          "Content-Type": file.type,
+          "X-File-Name": encodeURIComponent(file.name),
+          "X-File-Size": String(file.size),
+        },
+      });
+      await cache.put("/shared-pdf", response);
+    }
+  } catch (err) {
+    console.error("[SW] Erro ao processar share target:", err);
+  }
+
+  // Redirecionar para /converter com flag de arquivo compartilhado
+  return Response.redirect("/converter?shared=1", 303);
+}

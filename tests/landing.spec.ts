@@ -34,7 +34,7 @@ test.describe("Landing Page", () => {
     await expect(page.getByText("R$ 0")).toBeVisible();
     await expect(page.getByText("R$ 9,90")).toBeVisible();
     await expect(page.getByText("Popular")).toBeVisible();
-    await expect(page.getByText("5 conversões por mês")).toBeVisible();
+    await expect(page.getByText("5 conversões/mês com conta")).toBeVisible();
     await expect(page.getByText("Conversões ilimitadas")).toBeVisible();
   });
 

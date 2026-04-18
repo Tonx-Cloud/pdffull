@@ -167,13 +167,15 @@ test.describe("Register Page", () => {
   });
 
   test("botões habilitados após aceitar termos", async ({ page }) => {
-    // Aguardar hydration — email input interativo
-    const emailInput = page.getByPlaceholder("seu@email.com");
-    await expect(emailInput).toBeVisible();
+    // Aguardar hydration completa (beforeEach usa domcontentloaded)
+    await page.waitForLoadState("networkidle");
 
-    // Clicar na label do checkbox (mais confiável que clicar no input)
+    // Clicar no label do checkbox para disparar onChange do React
     const label = page.locator('label').filter({ hasText: 'Li e aceito' });
     await label.click();
+
+    // Confirmar que checkbox foi marcado (React processou o evento)
+    await expect(page.locator('input[type="checkbox"]')).toBeChecked({ timeout: 5_000 });
 
     // Aguardar botões habilitados
     const googleBtn = page.getByRole("button", { name: /Registrar com Google/i });

@@ -23,12 +23,11 @@ test.describe("Páginas Legais", () => {
   test("Termos tem link para voltar", async ({ page }) => {
     await page.goto("/termos");
 
-    // Verificar que existe link para a landing
-    const backLink = page.getByRole("link", { name: /PDFfULL/i });
-    if (await backLink.isVisible()) {
-      await backLink.click();
-      await expect(page).toHaveURL("/");
-    }
+    // Verificar que existe link "Voltar ao início" para a landing
+    const backLink = page.getByRole("link", { name: /Voltar ao início/i });
+    await expect(backLink).toBeVisible();
+    await backLink.click();
+    await expect(page).toHaveURL("/");
   });
 });
 

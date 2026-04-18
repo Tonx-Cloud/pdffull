@@ -35,12 +35,12 @@ test.describe("Navegação Geral", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test("fluxo landing → converter (redireciona para login sem auth)", async ({ page }) => {
+  test("fluxo landing → converter (acessível sem auth)", async ({ page }) => {
     await page.goto("/");
 
     await page.getByRole("link", { name: /Converter Agora/i }).click();
-    // Middleware protege /converter → vai para /login
-    await expect(page).toHaveURL(/\/login/);
+    // /converter é acessível sem auth
+    await expect(page).toHaveURL(/\/converter/);
   });
 
   test("fluxo landing → termos", async ({ page }) => {

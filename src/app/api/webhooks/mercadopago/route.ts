@@ -86,11 +86,18 @@ export async function POST(request: NextRequest) {
   const dataId = String((body.data as Record<string, unknown>)?.id || "");
   const eventType = String(body.type || "unknown");
 
-  // Verificar assinatura HMAC se MP_WEBHOOK_SECRET estiver configurado
-  const hasSecret = !!process.env.MP_WEBHOOK_SECRET;
-  const verified = hasSecret ? verifyWebhookSignature(request, dataId) : false;
+  // Verificar assinatura HMAC — MP_WEBHOOK_SECRET é OBRIGATÓRIO em produção
+  if (!process.env.MP_WEBHOOK_SECRET) {
+    console.error("[SECURITY] MP_WEBHOOK_SECRET não configurado");
+    return NextResponse.json(
+      { error: "Webhook not configured" },
+      { status: 503 }
+    );
+  }
 
-  if (hasSecret && !verified) {
+  const verified = verifyWebhookSignature(request, dataId);
+
+  if (!verified) {
     await logWebhookAttempt(supabase, {
       event_type: eventType,
       payment_id: dataId || null,
@@ -152,22 +159,7 @@ async function handleSubscriptionEvent(
     return NextResponse.json({ error: "Subscription fetch failed" }, { status: 500 });
   }
 
-  let userId = subscription.external_reference;
-
-  // Fallback: se external_reference estiver ausente, buscar user pelo payer_email
-  if (!userId && subscription.payer_email) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("email", subscription.payer_email)
-      .single();
-    if (profile) {
-      userId = profile.id;
-      console.log(
-        `[webhook] external_reference ausente, user encontrado por email: ${subscription.payer_email} → ${userId}`
-      );
-    }
-  }
+  const userId = subscription.external_reference;
 
   if (!userId) {
     await logWebhookAttempt(supabase, {
@@ -176,7 +168,7 @@ async function handleSubscriptionEvent(
       status: "error",
       ip,
       verified,
-      details: `external_reference ausente e payer_email (${subscription.payer_email || "null"}) não encontrado`,
+      details: `external_reference ausente (payer_email: ${subscription.payer_email || "null"}) — rejeitado por segurança`,
     });
     return NextResponse.json({ error: "user_id missing" }, { status: 400 });
   }

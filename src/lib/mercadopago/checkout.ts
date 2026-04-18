@@ -47,6 +47,7 @@ export async function createSubscription(
       payer_email: userEmail,
       external_reference: userId,
       back_url: `${appUrl}/conta?subscription=success`,
+      notification_url: `${appUrl}/api/webhooks/mercadopago?source_news=webhooks`,
       reason: "PDFfULL Pro — Conversões Ilimitadas",
       auto_recurring: {
         frequency: 1,

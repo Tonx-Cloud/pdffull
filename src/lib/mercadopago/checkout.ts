@@ -1,20 +1,20 @@
 /**
  * Módulo de integração com Mercado Pago Subscriptions.
- * Usa preapproval_plan (plano de assinatura genérico) + fetch direto na API REST.
+ * Cria preapproval avulsa (sem preapproval_plan) com external_reference = userId.
  *
  * Fluxo:
- *  1. Cria (ou reutiliza) um preapproval_plan no MP (plano genérico, sem e-mail do pagador)
- *  2. Obtém o init_point do plano — URL de checkout hospedada pelo MP
+ *  1. POST /preapproval com external_reference = userId + auto_recurring inline
+ *  2. MP retorna init_point — URL de checkout hospedada pelo MP
  *  3. Redireciona o usuário para o init_point
- *  4. O MP cria o preapproval individual quando o usuário conclui o checkout
- *  5. O MP redireciona de volta para back_url com preapproval_id
- *  6. Webhook recebe subscription_preapproval para ativar o plano
+ *  4. O usuário paga (cartão/PIX/saldo) no checkout do MP
+ *  5. MP envia webhook subscription_preapproval com o preapproval_id
+ *  6. Webhook busca preapproval → external_reference → ativa o plano Pro
+ *
+ * IMPORTANTE: Não usar preapproval_plan_id — o MP exige card_token_id
+ * ao vincular preapproval a um plano existente, o que impede o fluxo redirect.
  */
 
 const MP_API = "https://api.mercadopago.com";
-
-/** ID do plano no MP, cached em memória para evitar criar duplicatas */
-let cachedPlanId: string | null = null;
 
 function getAccessToken(): string {
   const token = (process.env.MP_ACCESS_TOKEN ?? "").trim();
@@ -27,72 +27,16 @@ function getAppUrl(): string {
 }
 
 /**
- * Cria um preapproval_plan no Mercado Pago (plano de assinatura recorrente).
- * Se já existir um plano em cache, reutiliza.
- */
-async function getOrCreatePlan(): Promise<string> {
-  if (cachedPlanId) {
-    // Verificar se o plano ainda existe no MP
-    const accessToken = getAccessToken();
-    const check = await fetch(`${MP_API}/preapproval_plan/${cachedPlanId}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    if (check.ok) return cachedPlanId;
-    cachedPlanId = null;
-  }
-
-  const accessToken = getAccessToken();
-  const appUrl = getAppUrl();
-
-  const res = await fetch(`${MP_API}/preapproval_plan`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      reason: "PDFfULL Pro — Conversões Ilimitadas",
-      auto_recurring: {
-        frequency: 1,
-        frequency_type: "months",
-        transaction_amount: 9.9,
-        currency_id: "BRL",
-      },
-      back_url: `${appUrl}/conta?subscription=success`,
-      notification_url: `${appUrl}/api/webhooks/mercadopago?source_news=webhooks`,
-    }),
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    const msg =
-      (data?.cause as Array<{ description?: string }>)?.[0]?.description ??
-      data?.message ??
-      "Erro ao criar plano de assinatura no Mercado Pago";
-    console.error("[getOrCreatePlan] MP error:", JSON.stringify(data));
-    throw new Error(msg);
-  }
-
-  cachedPlanId = data.id as string;
-  console.log("[getOrCreatePlan] Plano criado:", cachedPlanId);
-  return cachedPlanId;
-}
-
-/**
- * Cria uma assinatura individual (preapproval) para o usuário,
- * vinculada ao plano genérico, com external_reference = userId.
- * O MP gera um init_point exclusivo para essa assinatura.
+ * Cria uma preapproval avulsa (assinatura recorrente) para o usuário.
+ * O external_reference vincula ao userId do Supabase — independente do email do pagador.
  */
 export async function createSubscription(
   userId: string,
   userEmail: string
 ): Promise<{ id: string; init_point: string }> {
-  const planId = await getOrCreatePlan();
   const accessToken = getAccessToken();
   const appUrl = getAppUrl();
 
-  // Criar preapproval individual com external_reference = userId
   const res = await fetch(`${MP_API}/preapproval`, {
     method: "POST",
     headers: {
@@ -100,11 +44,16 @@ export async function createSubscription(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      preapproval_plan_id: planId,
       payer_email: userEmail,
       external_reference: userId,
       back_url: `${appUrl}/conta?subscription=success`,
       reason: "PDFfULL Pro — Conversões Ilimitadas",
+      auto_recurring: {
+        frequency: 1,
+        frequency_type: "months",
+        transaction_amount: 9.9,
+        currency_id: "BRL",
+      },
       status: "pending",
     }),
   });
@@ -117,10 +66,6 @@ export async function createSubscription(
       data?.message ??
       "Erro ao criar assinatura no Mercado Pago";
     console.error("[createSubscription] MP error:", JSON.stringify(data));
-    // Limpar cache do plano se for erro de plano inválido
-    if (res.status === 404 || res.status === 400) {
-      cachedPlanId = null;
-    }
     throw new Error(msg);
   }
 

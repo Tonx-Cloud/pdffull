@@ -288,22 +288,27 @@ async function handlePaymentEvent(
     return NextResponse.json({ received: true });
   }
 
-  // Identificar o usuário via metadata, external_reference ou payer_email
+  // Identificar o usuário via metadata ou external_reference
   let userId =
     payment.metadata?.user_id || payment.external_reference || null;
 
-  // Fallback: buscar user pelo payer_email se disponível
-  if (!userId && payment.payer?.email) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("email", payment.payer.email)
-      .single();
-    if (profile) {
-      userId = profile.id;
-      console.log(
-        `[webhook payment] user encontrado por payer.email: ${payment.payer.email} → ${userId}`
-      );
+  // Se o pagamento veio de uma preapproval, buscar external_reference dela
+  if (!userId) {
+    const preapprovalId =
+      payment.metadata?.preapproval_id || null;
+    if (preapprovalId) {
+      try {
+        const preApprovalApi = new PreApproval(mpClient);
+        const preapproval = await preApprovalApi.get({ id: String(preapprovalId) });
+        if (preapproval?.external_reference) {
+          userId = preapproval.external_reference;
+          console.log(
+            `[webhook payment] user via preapproval ${preapprovalId}: ${userId}`
+          );
+        }
+      } catch {
+        console.warn(`[webhook payment] Falha ao buscar preapproval ${preapprovalId}`);
+      }
     }
   }
 

@@ -1,4 +1,4 @@
-import { FileText, Camera, Zap, Shield, ArrowRight, Mail, CheckCircle, Layers, Brain, Globe, BookOpen, Sparkles } from "lucide-react";
+import { FileText, Camera, Zap, Shield, ArrowRight, CheckCircle, Layers, Brain, Globe, BookOpen, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PwaInstallButton } from "@/components/pwa/pwa-install-button";
@@ -321,17 +321,6 @@ export default function Home() {
                   Ver FAQ
                 </Button>
               </Link>
-              <a href="mailto:contato@pdffull.com.br">
-                <Button variant="outline" className="gap-2">
-                  <Mail className="h-4 w-4" />
-                  contato@pdffull.com.br
-                </Button>
-              </a>
-              <a href="https://wa.me/5511999999999?text=Olá, preciso de ajuda com o PDFfULL" target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="gap-2 bg-green-50 border-green-200 text-green-700 hover:bg-green-100">
-                  WhatsApp
-                </Button>
-              </a>
             </div>
           </div>
         </section>

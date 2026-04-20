@@ -25,7 +25,7 @@ const securityHeaders = [
       "img-src 'self' data: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com https://api.mercadopago.com",
-      "frame-src 'self' https://www.mercadopago.com.br https://sdk.mercadopago.com",
+      "frame-src 'self' blob: https://www.mercadopago.com.br https://sdk.mercadopago.com",
     ].join("; "),
   },
 ];

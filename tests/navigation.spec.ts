@@ -18,7 +18,7 @@ test.describe("Navegação Geral", () => {
   test("fluxo landing → login → register → landing", async ({ page }) => {
     // 1. Landing
     await page.goto("/");
-    await expect(page.locator("header h1")).toHaveText("PDFfULL");
+    await expect(page.locator("header").getByRole("link", { name: "PDFfULL" })).toBeVisible();
 
     // 2. Ir para Login
     await page.getByRole("link", { name: /Entrar/i }).click();
@@ -38,7 +38,7 @@ test.describe("Navegação Geral", () => {
   test("fluxo landing → converter (acessível sem auth)", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("link", { name: /Converter Agora/i }).click();
+    await page.getByRole("link", { name: /Converter Agora/i }).first().click();
     // /converter é acessível sem auth
     await expect(page).toHaveURL(/\/converter/);
   });

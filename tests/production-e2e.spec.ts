@@ -18,10 +18,10 @@ test.describe("Landing Page", () => {
   });
 
   test("hero renderiza título, subtítulo e CTA", async ({ page }) => {
-    await expect(page.locator("header h1")).toHaveText("PDFfULL");
+    await expect(page.locator("header").getByRole("link", { name: "PDFfULL" })).toBeVisible();
     const hero = page.getByRole("heading", { name: /Foto em PDF/i });
     await expect(hero).toBeVisible();
-    const cta = page.getByRole("link", { name: /Converter Agora/i });
+    const cta = page.getByRole("link", { name: /Converter Agora/i }).first();
     await expect(cta).toBeVisible();
     await expect(cta).toHaveAttribute("href", "/converter");
     await expect(page.getByText(/2 conversões grátis sem cadastro/i)).toBeVisible();
@@ -54,14 +54,14 @@ test.describe("Landing Page", () => {
   test("footer: links legais (Sobre, FAQ, Termos, Privacidade)", async ({ page }) => {
     const footer = page.locator("footer");
     await expect(footer.getByRole("link", { name: /Sobre/i })).toBeVisible();
-    await expect(footer.getByRole("link", { name: /FAQ/i })).toBeVisible();
+    await expect(footer.getByRole("link", { name: /Perguntas Frequentes/i })).toBeVisible();
     await expect(footer.getByRole("link", { name: /Termos/i })).toBeVisible();
     await expect(footer.getByRole("link", { name: /Privacidade/i })).toBeVisible();
   });
 
   test("LanguageSelector está presente", async ({ page }) => {
-    // O seletor de idioma tem um ícone Globe
-    await expect(page.locator("select").first()).toBeVisible();
+    // O seletor de idioma está no DOM (visível apenas no desktop via CSS)
+    await expect(page.locator("select").first()).toBeAttached();
   });
 });
 
@@ -72,7 +72,7 @@ test.describe("Landing Page", () => {
 test.describe("Navegação a partir da Landing", () => {
   test("CTA Converter Agora → /converter", async ({ page }) => {
     await page.goto(BASE, { waitUntil: "domcontentloaded" });
-    await page.getByRole("link", { name: /Converter Agora/i }).click();
+    await page.getByRole("link", { name: /Converter Agora/i }).first().click();
     await expect(page).toHaveURL(/\/converter/);
   });
 
@@ -91,7 +91,7 @@ test.describe("Navegação a partir da Landing", () => {
 
   test("footer FAQ → /faq", async ({ page }) => {
     await page.goto(BASE, { waitUntil: "domcontentloaded" });
-    await page.locator("footer").getByRole("link", { name: /FAQ/i }).click();
+    await page.locator("footer").getByRole("link", { name: /Perguntas Frequentes/i }).click();
     await expect(page).toHaveURL(/\/faq/);
     await expect(page.getByText("Perguntas Frequentes")).toBeVisible();
   });
@@ -385,7 +385,7 @@ test.describe("Fluxos de navegação completos", () => {
     await page.goto(BASE, { waitUntil: "domcontentloaded" });
 
     // → FAQ
-    await page.locator("footer").getByRole("link", { name: /FAQ/i }).click();
+    await page.locator("footer").getByRole("link", { name: /Perguntas Frequentes/i }).click();
     await expect(page).toHaveURL(/\/faq/);
 
     // FAQ → Landing

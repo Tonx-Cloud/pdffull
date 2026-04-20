@@ -8,14 +8,14 @@ test.describe("Landing Page", () => {
     await expect(heroHeading).toBeVisible();
     await expect(heroHeading).toContainText("Um clique");
 
-    const ctaButton = page.getByRole("link", { name: /Converter Agora/i });
+    const ctaButton = page.getByRole("link", { name: /Converter Agora/i }).first();
     await expect(ctaButton).toBeVisible();
   });
 
   test("exibe header com logo e navegação", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.locator("header h1")).toHaveText("PDFfULL");
+    await expect(page.locator("header").getByRole("link", { name: "PDFfULL" })).toBeVisible();
     await expect(page.getByRole("link", { name: /Entrar/i })).toBeVisible();
     await expect(page.getByRole("link", { name: /Converter/i }).first()).toBeVisible();
   });
@@ -49,7 +49,7 @@ test.describe("Landing Page", () => {
   test("CTA redireciona para /converter (ou /login se não autenticado)", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("link", { name: /Converter Agora/i }).click();
+    await page.getByRole("link", { name: /Converter Agora/i }).first().click();
     // Middleware redireciona para /login se não autenticado
     await expect(page).toHaveURL(/\/(converter|login)/);
   });

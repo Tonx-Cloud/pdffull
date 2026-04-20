@@ -31,6 +31,13 @@ export function DashboardHeader() {
       >
         {t("converter")}
       </Link>
+      <Link
+        href="/leitor"
+        className="hover:text-blue-600"
+        onClick={() => setMenuOpen(false)}
+      >
+        Ler PDF
+      </Link>
       {isLoggedIn === null ? null : isLoggedIn ? (
         <>
           <Link

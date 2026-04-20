@@ -1,4 +1,4 @@
-import { FileText, Camera, Zap, Shield, ArrowRight, Mail, CheckCircle, Layers, Brain, Globe } from "lucide-react";
+import { FileText, Camera, Zap, Shield, ArrowRight, Mail, CheckCircle, Layers, Brain, Globe, BookOpen, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PwaInstallButton } from "@/components/pwa/pwa-install-button";
@@ -23,6 +23,9 @@ export default function Home() {
             </Link>
             <Link href="/converter" className="text-muted-foreground hover:text-blue-600 transition-colors">
               Converter
+            </Link>
+            <Link href="/leitor" className="text-muted-foreground hover:text-blue-600 transition-colors">
+              Ler PDF
             </Link>
             <LanguageSelector />
             <Link href="/login">
@@ -191,6 +194,15 @@ export default function Home() {
                 </p>
               </div>
             </div>
+            <div className="flex items-start gap-3 rounded-xl border-2 border-blue-100 bg-blue-50/50 p-5">
+              <BookOpen className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-sm">Leitor de PDF <span className="text-[10px] bg-blue-600 text-white px-1.5 py-0.5 rounded-full ml-1">Novo</span></h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Abra qualquer PDF no navegador ou no celular. Analise com IA no plano Pro.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -208,6 +220,7 @@ export default function Home() {
                 <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 2 conversões sem cadastro</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> 5 conversões/mês com conta</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Leitor de PDF grátis</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Download direto</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Funciona offline</li>
                 </ul>
@@ -228,6 +241,7 @@ export default function Home() {
                 <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-blue-500" /> Conversões ilimitadas</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-blue-500" /> Múltiplas fotos → 1 PDF</li>
+                  <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-blue-500" /> Leitor + Análise de PDF com IA</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-blue-500" /> Histórico na nuvem</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-blue-500" /> Links de compartilhamento</li>
                   <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-blue-500" /> Suporte prioritário</li>
@@ -237,6 +251,41 @@ export default function Home() {
                     Assinar Pro
                   </Button>
                 </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Seção Leitor de PDF */}
+        <section className="px-4 py-16">
+          <div className="mx-auto max-w-4xl">
+            <div className="rounded-2xl border-2 border-blue-100 bg-linear-to-br from-blue-50 to-white p-8 flex flex-col md:flex-row items-center gap-8">
+              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-100 shrink-0">
+                <BookOpen className="h-10 w-10 text-blue-600" />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
+                  <h2 className="text-2xl font-bold">Leitor de PDF</h2>
+                  <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">Novo</span>
+                </div>
+                <p className="text-muted-foreground mb-4">
+                  Abra qualquer PDF diretamente no navegador ou celular — sem instalar nada.
+                  Com o plano Pro, analise documentos com IA e extraia texto com OCR.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+                  <Link href="/leitor">
+                    <Button className="bg-blue-600 hover:bg-blue-700 gap-2">
+                      <BookOpen className="h-4 w-4" />
+                      Abrir Leitor — Grátis
+                    </Button>
+                  </Link>
+                  <Link href="/leitor">
+                    <Button variant="outline" className="gap-2">
+                      <Sparkles className="h-4 w-4 text-orange-500" />
+                      IA com Pro
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -302,6 +351,7 @@ export default function Home() {
               <p className="font-semibold mb-3">Navegação</p>
               <nav className="flex flex-col gap-2 text-muted-foreground">
                 <Link href="/converter" className="hover:text-blue-600 transition-colors">Converter PDF</Link>
+                <Link href="/leitor" className="hover:text-blue-600 transition-colors">Leitor de PDF</Link>
                 <Link href="/sobre" className="hover:text-blue-600 transition-colors">Sobre Nós</Link>
                 <Link href="/faq" className="hover:text-blue-600 transition-colors">Perguntas Frequentes</Link>
               </nav>

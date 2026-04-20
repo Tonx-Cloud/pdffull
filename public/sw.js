@@ -23,9 +23,12 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // Interceptar POST do Web Share Target em /converter
-  if (url.pathname === "/converter" && event.request.method === "POST") {
-    event.respondWith(handleShareTarget(event.request));
+  // Interceptar POST do Web Share Target em /leitor (PDFs) e /converter (imagens)
+  if (
+    (url.pathname === "/leitor" || url.pathname === "/converter") &&
+    event.request.method === "POST"
+  ) {
+    event.respondWith(handleShareTarget(event.request, url.pathname));
     return;
   }
 
@@ -97,16 +100,15 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-// Handler para Web Share Target — recebe PDF compartilhado via POST
-async function handleShareTarget(request) {
+// Handler para Web Share Target — recebe arquivo compartilhado via POST
+async function handleShareTarget(request, pathname) {
   try {
     const formData = await request.formData();
     const file = formData.get("file");
 
-    if (file && file instanceof File && file.type === "application/pdf") {
+    if (file && file instanceof File) {
       // Armazenar o arquivo no Cache API para o client-side consumir
       const cache = await caches.open(SHARED_FILES_CACHE);
-      // Criar uma Response com o arquivo para armazenar no cache
       const response = new Response(file, {
         headers: {
           "Content-Type": file.type,
@@ -120,6 +122,7 @@ async function handleShareTarget(request) {
     console.error("[SW] Erro ao processar share target:", err);
   }
 
-  // Redirecionar para /converter com flag de arquivo compartilhado
-  return Response.redirect("/converter?shared=1", 303);
+  // Redirecionar para a página correta com flag de arquivo compartilhado
+  const redirectPath = pathname === "/leitor" ? "/leitor" : "/converter";
+  return Response.redirect(redirectPath + "?shared=1", 303);
 }

@@ -40,7 +40,8 @@
 | **FASE 12** | 4 | ✅ | Domínio Customizado (pdf-full.com) |
 | **FASE 13** | 3 | ✅ | Testes E2E Produção (Playwright) |
 | **FASE 14** | 4 | 🔄 | File Handler & Share Target (Leitor PDF Android) |
-| **TOTAL** | **99** | 🔄 | Do setup ao lançamento |
+| **FASE 15** | 3 | ✅ | Landing Page Otimizada (CTAs, SEO, Sitelinks) |
+| **TOTAL** | **102** | 🔄 | Do setup ao lançamento |
 
 ---
 

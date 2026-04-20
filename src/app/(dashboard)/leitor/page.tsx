@@ -251,10 +251,11 @@ export default function LeitorPage() {
       </div>
 
       {/* Área de drag-and-drop */}
-      <label
+      <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
         className={`flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed p-12 cursor-pointer transition-colors ${
           isDragging
             ? "border-blue-500 bg-blue-50"
@@ -281,7 +282,7 @@ export default function LeitorPage() {
           className="hidden"
           onChange={(e) => handleFileSelect(e.target.files)}
         />
-      </label>
+      </div>
 
       {/* Cards de funcionalidades */}
       <div className="grid gap-4 sm:grid-cols-3 mt-2">

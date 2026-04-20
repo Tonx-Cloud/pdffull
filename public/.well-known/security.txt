@@ -1,0 +1,5 @@
+Contact: mailto:security@pdf-full.com
+Expires: 2027-04-20T00:00:00.000Z
+Preferred-Languages: pt-BR, en
+Canonical: https://pdf-full.com/.well-known/security.txt
+Policy: https://pdf-full.com/SECURITY.md

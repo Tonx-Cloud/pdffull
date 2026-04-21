@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MercadoPagoConfig, Payment, PreApproval } from "mercadopago";
 import { createClient } from "@supabase/supabase-js";
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 import { sendUpgradeEmail } from "@/lib/email/resend";
 
 function getSupabaseAdmin() {
@@ -45,7 +45,16 @@ function verifyWebhookSignature(
   hmac.update(manifest);
   const expectedHash = hmac.digest("hex");
 
-  return expectedHash === hash;
+  // Comparação em tempo constante para evitar timing attacks (CWE-208)
+  const expectedBuf = Buffer.from(expectedHash, "hex");
+  let receivedBuf: Buffer;
+  try {
+    receivedBuf = Buffer.from(hash, "hex");
+  } catch {
+    return false;
+  }
+  if (receivedBuf.length !== expectedBuf.length) return false;
+  return timingSafeEqual(expectedBuf, receivedBuf);
 }
 
 async function logWebhookAttempt(

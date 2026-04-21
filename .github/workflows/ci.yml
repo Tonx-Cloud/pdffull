@@ -5,6 +5,10 @@ on:
   pull_request:
     branches: [master, main]
 
+# Princípio do menor privilégio (CKV2_GHA_1)
+permissions:
+  contents: read
+
 jobs:
   lint-build:
     runs-on: ubuntu-latest

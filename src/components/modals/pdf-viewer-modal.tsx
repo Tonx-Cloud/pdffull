@@ -11,6 +11,12 @@ import {
 import { FileText, Maximize2, Minimize2, Loader2, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import dynamic from "next/dynamic";
+
+const PdfViewer = dynamic(
+  () => import("@/components/leitor/pdf-viewer").then((m) => m.PdfViewer),
+  { ssr: false }
+);
 
 interface PdfViewerModalProps {
   readonly open: boolean;
@@ -28,9 +34,9 @@ export function PdfViewerModal({
   filename,
 }: PdfViewerModalProps) {
   const [viewUrl, setViewUrl] = useState<string | null>(null);
+  const [viewBlob, setViewBlob] = useState<Blob | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errored, setErrored] = useState(false);
   const blobUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -40,9 +46,9 @@ export function PdfViewerModal({
         blobUrlRef.current = null;
       }
       setViewUrl(null);
+      setViewBlob(null);
       setFullscreen(false);
       setLoading(false);
-      setErrored(false);
       return;
     }
 
@@ -51,6 +57,7 @@ export function PdfViewerModal({
       const url = URL.createObjectURL(pdfBlob);
       blobUrlRef.current = url;
       setViewUrl(url);
+      setViewBlob(pdfBlob);
       return;
     }
 
@@ -63,15 +70,18 @@ export function PdfViewerModal({
           const url = URL.createObjectURL(blob);
           blobUrlRef.current = url;
           setViewUrl(url);
+          setViewBlob(blob);
         })
         .catch(() => {
           setViewUrl(pdfUrl);
+          setViewBlob(null);
         })
         .finally(() => setLoading(false));
       return;
     }
 
     setViewUrl(null);
+    setViewBlob(null);
   }, [open, pdfBlob, pdfUrl]);
 
   useEffect(() => {
@@ -84,15 +94,11 @@ export function PdfViewerModal({
   }, []);
 
   const openInNewTab = () => {
-    if (viewUrl) window.open(viewUrl, "_blank");
+    if (viewUrl) globalThis.open(viewUrl, "_blank");
   };
 
   return (
-    <DialogPrimitive.Root
-      open={open}
-      onOpenChange={onOpenChange}
-      dismissible={false}
-    >
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPortal>
         <DialogOverlay />
         <DialogPrimitive.Popup
@@ -143,26 +149,19 @@ export function PdfViewerModal({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex-1 min-h-0">
+          <div className="flex-1 min-h-0 overflow-hidden rounded-lg border">
             {loading && (
               <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                 <p className="text-sm">Carregando PDF...</p>
               </div>
             )}
-            {!loading && viewUrl && !errored && (
-              <iframe
-                src={viewUrl}
-                className="h-full w-full rounded-lg border"
-                title={`Visualizar ${filename}`}
-                onError={() => setErrored(true)}
-              />
-            )}
-            {!loading && viewUrl && errored && (
+            {!loading && viewBlob && <PdfViewer blob={viewBlob} />}
+            {!loading && !viewBlob && viewUrl && (
               <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
                 <FileText className="h-12 w-12 opacity-30" />
                 <p className="text-sm text-center">
-                  Seu navegador não suporta visualização inline.
+                  Não foi possível carregar o PDF.
                 </p>
                 <Button onClick={openInNewTab} className="gap-2">
                   <ExternalLink className="h-4 w-4" />

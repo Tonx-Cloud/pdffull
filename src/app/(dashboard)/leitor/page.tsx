@@ -34,6 +34,11 @@ const UpgradeModal = dynamic(
   { ssr: false }
 );
 
+const PdfViewer = dynamic(
+  () => import("@/components/leitor/pdf-viewer").then((m) => m.PdfViewer),
+  { ssr: false }
+);
+
 export default function LeitorPage() {
   const t = useTranslations("Leitor");
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
@@ -228,12 +233,7 @@ export default function LeitorPage() {
           className="flex-1 rounded-xl border overflow-hidden bg-gray-100"
           style={{ minHeight: "65vh" }}
         >
-          <iframe
-            src={`${pdfUrl}#toolbar=1&navpanes=1`}
-            className="w-full h-full"
-            style={{ minHeight: "65vh", border: "none" }}
-            title={filename}
-          />
+          {pdfBlob && <PdfViewer blob={pdfBlob} />}
         </div>
 
         {/* Abrir outro arquivo */}

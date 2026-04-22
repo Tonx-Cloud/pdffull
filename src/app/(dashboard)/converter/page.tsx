@@ -14,10 +14,12 @@ import { useSharedFile } from "@/hooks/use-shared-file";
 import { UpgradeModal } from "@/components/modals/upgrade-modal";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { useTranslations } from "next-intl";
 
 type Stage = "capture" | "processing" | "done";
 
 export default function ConverterPage() {
+  const t = useTranslations("Converter");
   const [images, setImages] = useState<File[]>([]);
   const [stage, setStage] = useState<Stage>("capture");
   const [progress, setProgress] = useState(0);
@@ -38,8 +40,8 @@ export default function ConverterPage() {
     setPdfFilename(pdfFile.name);
     setStage("done");
     clearSharedFiles();
-    toast.success("PDF recebido!");
-  }, [sharedFiles, clearSharedFiles]);
+    toast.success(t("pdfReceived"));
+  }, [sharedFiles, clearSharedFiles, t]);
 
   // Verificar se está logado
   useEffect(() => {
@@ -72,7 +74,7 @@ export default function ConverterPage() {
 
   const handleConvert = async () => {
     if (images.length === 0) {
-      toast.error("Adicione pelo menos uma imagem");
+      toast.error(t("addAtLeastOne"));
       return;
     }
 
@@ -86,13 +88,13 @@ export default function ConverterPage() {
 
     try {
       // Etapa 1: Comprimir imagens
-      setProgressLabel("Comprimindo imagens...");
+      setProgressLabel(t("compressing"));
       const compressed = await compressImages(images, (current, total) => {
         setProgress(Math.round((current / total) * 40));
       });
 
       // Etapa 2: Gerar PDF
-      setProgressLabel("Gerando PDF...");
+      setProgressLabel(t("generating"));
       const blob = await generatePdf(compressed, (current, total) => {
         setProgress(40 + Math.round((current / total) * 40));
       });
@@ -101,7 +103,7 @@ export default function ConverterPage() {
 
       // Etapa 3: Upload para nuvem (apenas se logado)
       if (isLoggedIn) {
-        setProgressLabel("Salvando na nuvem...");
+        setProgressLabel(t("savingCloud"));
         setProgress(80);
 
         const signedRes = await fetch("/api/upload/signed-url", {
@@ -154,10 +156,10 @@ export default function ConverterPage() {
       setPdfFilename(filename);
       setStage("done");
       limit.refresh();
-      toast.success("PDF gerado com sucesso!");
+      toast.success(t("success"));
     } catch (error) {
       console.error("Erro na conversão:", error);
-      toast.error(error instanceof Error ? error.message : "Erro ao converter. Tente novamente.");
+      toast.error(error instanceof Error ? error.message : t("errorConvert"));
       setStage("capture");
     }
   };
@@ -205,9 +207,9 @@ export default function ConverterPage() {
   return (
     <div className="flex flex-col items-center gap-8 py-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold">Converter para PDF</h1>
+        <h1 className="text-3xl font-bold">{t("pageTitle")}</h1>
         <p className="text-muted-foreground mt-2">
-          Tire uma foto ou carregue da galeria
+          {t("subtitle")}
         </p>
       </div>
 
@@ -220,10 +222,10 @@ export default function ConverterPage() {
             {!limit.canConvert && <AlertTriangle className="h-4 w-4 text-red-600" />}
             <span className={limit.canConvert ? "text-blue-700" : "text-red-700"}>
               {limit.canConvert
-                ? `${limit.used}/${limit.max} conversões usadas este mês`
+                ? t("usageCount", { used: limit.used, max: limit.max })
                 : limit.isAnon
-                  ? "Limite gratuito atingido"
-                  : "Limite mensal atingido"}
+                  ? t("anonLimitReached")
+                  : t("monthlyLimitReached")}
             </span>
           </div>
           {!limit.canConvert && limit.isAnon && (
@@ -231,7 +233,7 @@ export default function ConverterPage() {
               href="/register"
               className="text-blue-600 hover:underline text-xs mt-1 inline-block font-medium"
             >
-              Cadastre-se grátis e ganhe +3 conversões →
+              {t("signUpPrompt")}
             </a>
           )}
           {!limit.canConvert && !limit.isAnon && (
@@ -239,7 +241,7 @@ export default function ConverterPage() {
               onClick={() => setShowUpgrade(true)}
               className="text-blue-600 hover:underline text-xs mt-1 inline-block"
             >
-              Fazer upgrade para Pro →
+              {t("upgradePrompt")}
             </button>
           )}
         </div>
@@ -260,8 +262,8 @@ export default function ConverterPage() {
           onClick={handleConvert}
         >
           <FileText className="h-5 w-5" />
-          Gerar PDF ({images.length}{" "}
-          {images.length === 1 ? "imagem" : "imagens"})
+          {t("convert")} ({images.length}{" "}
+          {t("imagesCount", { count: images.length })})
         </Button>
       )}
 

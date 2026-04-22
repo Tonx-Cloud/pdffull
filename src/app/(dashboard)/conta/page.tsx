@@ -2,9 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import type { Profile } from "@/types";
 import { ContaActions } from "@/components/account/conta-actions";
+import { getTranslations, getLocale } from "next-intl/server";
 
 export default async function ContaPage() {
   const supabase = await createClient();
+  const t = await getTranslations("Account");
+  const locale = await getLocale();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -26,27 +29,27 @@ export default async function ContaPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold">Minha Conta</h1>
-        <p className="text-muted-foreground mt-1">Perfil e plano</p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
       </div>
 
       {/* Perfil */}
       <div className="rounded-xl border p-6 bg-white space-y-4">
-        <h2 className="font-semibold text-lg">Perfil</h2>
+        <h2 className="font-semibold text-lg">{t("profileTitle")}</h2>
         <div className="grid gap-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Nome</span>
+            <span className="text-muted-foreground">{t("name")}</span>
             <span className="font-medium">{profile?.name ?? "—"}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Email</span>
+            <span className="text-muted-foreground">{t("email")}</span>
             <span className="font-medium">{profile?.email ?? user.email}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Membro desde</span>
+            <span className="text-muted-foreground">{t("memberSince")}</span>
             <span className="font-medium">
               {profile
-                ? new Date(profile.created_at).toLocaleDateString("pt-BR")
+                ? new Date(profile.created_at).toLocaleDateString(locale)
                 : "—"}
             </span>
           </div>
@@ -55,7 +58,7 @@ export default async function ContaPage() {
 
       {/* Plano */}
       <div className="rounded-xl border p-6 bg-white space-y-4">
-        <h2 className="font-semibold text-lg">Plano atual</h2>
+        <h2 className="font-semibold text-lg">{t("currentPlan")}</h2>
         <div className="flex items-center gap-3">
           <span
             className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -64,17 +67,17 @@ export default async function ContaPage() {
                 : "bg-gray-100 text-gray-700"
             }`}
           >
-            {plan === "pro" ? "Pro" : "Gratuito"}
+            {plan === "pro" ? t("planPro") : t("planFree")}
           </span>
           {plan === "pro" && (
-            <span className="text-sm text-muted-foreground">R$ 9,90/mês</span>
+            <span className="text-sm text-muted-foreground">{t("proPrice")}</span>
           )}
         </div>
 
         {/* Uso mensal */}
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Conversões este mês</span>
+            <span className="text-muted-foreground">{t("conversionsThisMonth")}</span>
             <span className="font-medium">
               {used} / {max}
             </span>
@@ -98,7 +101,7 @@ export default async function ContaPage() {
           type="submit"
           className="text-sm text-red-600 hover:underline"
         >
-          Sair da conta
+          {t("logout")}
         </button>
       </form>
     </div>

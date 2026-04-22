@@ -18,6 +18,7 @@ import { useSharedFile } from "@/hooks/use-shared-file";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const AiAnalysisModal = dynamic(
   () =>
@@ -34,6 +35,7 @@ const UpgradeModal = dynamic(
 );
 
 export default function LeitorPage() {
+  const t = useTranslations("Leitor");
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [filename, setFilename] = useState("documento.pdf");
@@ -93,13 +95,13 @@ export default function LeitorPage() {
         window.history.replaceState({}, "", url.pathname + url.search);
       } catch (err) {
         console.error("[Leitor] Erro ao baixar PDF remoto:", err);
-        toast.error("Não foi possível carregar o PDF recebido.");
+        toast.error(t("errorRemoteLoad"));
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   function loadPdf(file: Blob, name: string) {
     if (blobUrlRef.current) {
@@ -133,7 +135,7 @@ export default function LeitorPage() {
     if (!files || files.length === 0) return;
     const file = files[0];
     if (file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
-      toast.error("Selecione um arquivo PDF válido");
+      toast.error(t("errorInvalidPdf"));
       return;
     }
     loadPdf(file, file.name);
@@ -196,7 +198,7 @@ export default function LeitorPage() {
               className="gap-1"
             >
               <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Baixar</span>
+              <span className="hidden sm:inline">{t("download")}</span>
             </Button>
             {pdfBlob && (
               <ShareMenu pdfBlob={pdfBlob} filename={filename} />
@@ -208,14 +210,14 @@ export default function LeitorPage() {
               className="gap-1"
             >
               <Sparkles className="h-4 w-4 text-orange-500" />
-              <span className="hidden sm:inline">Analisar com IA</span>
+              <span className="hidden sm:inline">{t("analyzeAi")}</span>
               {!isPro && (
                 <span className="text-[10px] bg-blue-100 text-blue-700 px-1 rounded">
-                  Pro
+                  {t("proBadge")}
                 </span>
               )}
             </Button>
-            <Button variant="ghost" size="sm" onClick={closePdf} aria-label="Fechar">
+            <Button variant="ghost" size="sm" onClick={closePdf} aria-label={t("closeLabel")}>
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -242,7 +244,7 @@ export default function LeitorPage() {
             className="text-muted-foreground text-xs"
             onClick={() => fileInputRef.current?.click()}
           >
-            Abrir outro arquivo
+            {t("openAnother")}
           </Button>
           <input
             ref={fileInputRef}
@@ -274,11 +276,10 @@ export default function LeitorPage() {
       <div className="text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <BookOpen className="h-6 w-6 text-blue-600" />
-          <h1 className="text-2xl font-bold">Leitor de PDF</h1>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
         </div>
         <p className="text-muted-foreground text-sm">
-          Abra, visualize e analise qualquer PDF diretamente no navegador — sem
-          instalar nada
+          {t("subtitle")}
         </p>
       </div>
 
@@ -298,14 +299,14 @@ export default function LeitorPage() {
           <FileText className="h-8 w-8 text-blue-600" />
         </div>
         <div className="text-center">
-          <p className="font-semibold">Arraste um PDF aqui</p>
+          <p className="font-semibold">{t("dropHere")}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            ou clique para selecionar do seu dispositivo
+            {t("orClickSelect")}
           </p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700 gap-2 pointer-events-none">
           <Upload className="h-4 w-4" />
-          Selecionar PDF
+          {t("selectPdf")}
         </Button>
         <input
           ref={fileInputRef}
@@ -319,47 +320,47 @@ export default function LeitorPage() {
       {/* Cards de funcionalidades */}
       <div className="grid gap-4 sm:grid-cols-3 mt-2">
         <div className="rounded-xl border bg-white p-4">
-          <p className="font-semibold text-sm mb-2">✅ Plano Gratuito</p>
+          <p className="font-semibold text-sm mb-2">{t("freePlanTitle")}</p>
           <ul className="space-y-1 text-xs text-muted-foreground">
             <li className="flex items-center gap-1.5">
               <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />
-              Visualizar qualquer PDF
+              {t("freeViewPdf")}
             </li>
             <li className="flex items-center gap-1.5">
               <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />
-              Navegação por páginas
+              {t("freeNav")}
             </li>
             <li className="flex items-center gap-1.5">
               <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />
-              Download direto
+              {t("freeDownload")}
             </li>
             <li className="flex items-center gap-1.5">
               <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />
-              Funciona offline (PWA)
+              {t("freeOffline")}
             </li>
           </ul>
         </div>
 
         <div className="rounded-xl border-2 border-blue-200 bg-blue-50/50 p-4">
           <p className="font-semibold text-sm text-blue-700 mb-2">
-            ⭐ Plano Pro
+            {t("proPlanTitle")}
           </p>
           <ul className="space-y-1 text-xs text-muted-foreground">
             <li className="flex items-center gap-1.5">
               <CheckCircle className="h-3 w-3 text-blue-500 shrink-0" />
-              Análise de texto com IA
+              {t("proAiAnalysis")}
             </li>
             <li className="flex items-center gap-1.5">
               <CheckCircle className="h-3 w-3 text-blue-500 shrink-0" />
-              Extração de conteúdo (OCR)
+              {t("proOcr")}
             </li>
             <li className="flex items-center gap-1.5">
               <CheckCircle className="h-3 w-3 text-blue-500 shrink-0" />
-              Compartilhar por link
+              {t("proShareLink")}
             </li>
             <li className="flex items-center gap-1.5">
               <CheckCircle className="h-3 w-3 text-blue-500 shrink-0" />
-              Histórico na nuvem
+              {t("proCloudHistory")}
             </li>
           </ul>
           <Link href="/conta" className="inline-block mt-3">
@@ -367,16 +368,15 @@ export default function LeitorPage() {
               size="sm"
               className="bg-blue-600 hover:bg-blue-700 text-xs h-7"
             >
-              Assinar Pro — R$ 9,90/mês
+              {t("subscribePro")}
             </Button>
           </Link>
         </div>
 
         <div className="rounded-xl border bg-white p-4">
-          <p className="font-semibold text-sm mb-2">📱 Instale no celular</p>
+          <p className="font-semibold text-sm mb-2">{t("installTitle")}</p>
           <p className="text-xs text-muted-foreground mb-3">
-            Instale o PDFfULL e o app aparecerá como opção ao abrir qualquer
-            PDF no Android ou PC.
+            {t("installDesc")}
           </p>
           <PwaInstallButton />
         </div>

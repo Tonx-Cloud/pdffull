@@ -5,22 +5,24 @@ import { Button } from "@/components/ui/button";
 import { UpgradeModal } from "@/components/modals/upgrade-modal";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
-export function ContaActions({ plan }: { plan: "free" | "pro" }) {
+export function ContaActions({ plan }: { readonly plan: "free" | "pro" }) {
+  const t = useTranslations("Account");
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
   const handleCancel = async () => {
-    if (!confirm("Tem certeza que deseja cancelar o plano Pro?")) return;
+    if (!globalThis.confirm(t("confirmCancel"))) return;
 
     setCancelling(true);
     const res = await fetch("/api/cancel-subscription", { method: "POST" });
 
     if (res.ok) {
-      toast.success("Assinatura cancelada. Seu plano voltou para Gratuito.");
-      window.location.reload();
+      toast.success(t("cancelSuccess"));
+      globalThis.location.reload();
     } else {
-      toast.error("Erro ao cancelar. Tente novamente.");
+      toast.error(t("cancelError"));
     }
     setCancelling(false);
   };
@@ -32,7 +34,7 @@ export function ContaActions({ plan }: { plan: "free" | "pro" }) {
           className="bg-blue-600 hover:bg-blue-700"
           onClick={() => setShowUpgrade(true)}
         >
-          Fazer upgrade para Pro
+          {t("upgradeButton")}
         </Button>
         <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} />
       </>
@@ -46,7 +48,7 @@ export function ContaActions({ plan }: { plan: "free" | "pro" }) {
       className="text-sm text-red-600 hover:underline inline-flex items-center gap-1"
     >
       {cancelling && <Loader2 className="h-3 w-3 animate-spin" />}
-      Cancelar assinatura
+      {t("cancelButton")}
     </button>
   );
 }

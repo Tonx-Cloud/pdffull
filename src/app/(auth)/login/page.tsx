@@ -7,8 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Mail, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export default function LoginPage() {
+  const t = useTranslations("Auth");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -22,15 +24,15 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${globalThis.location.origin}/auth/callback`,
       },
     });
 
     if (error) {
-      toast.error("Erro ao enviar link. Tente novamente.");
+      toast.error(t("errorSendingLink"));
     } else {
       setSent(true);
-      toast.success("Link enviado! Verifique seu email.");
+      toast.success(t("linkSent"));
     }
     setLoading(false);
   };
@@ -39,12 +41,12 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${globalThis.location.origin}/auth/callback`,
         queryParams: { prompt: "select_account" },
       },
     });
     if (error) {
-      toast.error("Erro ao conectar com Google.");
+      toast.error(t("errorGoogle"));
     }
   };
 
@@ -55,18 +57,18 @@ export default function LoginPage() {
           <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-blue-100">
             <Mail className="h-8 w-8 text-blue-600" />
           </div>
-          <h2 className="text-xl font-semibold">Verifique seu email</h2>
+          <h2 className="text-xl font-semibold">{t("checkEmail")}</h2>
           <p className="text-sm text-muted-foreground">
-            Enviamos um link mágico para <strong>{email}</strong>.
-            <br />
-            Clique nele para entrar.
+            {t.rich("checkEmailLogin", {
+              email: () => <strong>{email}</strong>,
+            })}
           </p>
           <Button
             variant="ghost"
             onClick={() => setSent(false)}
             className="text-sm"
           >
-            Usar outro email
+            {t("useAnotherEmail")}
           </Button>
         </CardContent>
       </Card>
@@ -79,10 +81,8 @@ export default function LoginPage() {
         <div className="flex justify-center mb-2">
           <FileText className="h-8 w-8 text-blue-600" />
         </div>
-        <CardTitle className="text-2xl">Entrar no PDFfULL</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Acesse seu histórico e conversões ilimitadas
-        </p>
+        <CardTitle className="text-2xl">{t("loginTitle")}</CardTitle>
+        <p className="text-sm text-muted-foreground">{t("loginSubtitle")}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button
@@ -108,7 +108,7 @@ export default function LoginPage() {
               fill="#EA4335"
             />
           </svg>
-          Entrar com Google
+          {t("googleLogin")}
         </Button>
 
         <div className="relative">
@@ -117,7 +117,7 @@ export default function LoginPage() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-white px-2 text-muted-foreground">
-              ou com email
+              {t("orWithEmail")}
             </span>
           </div>
         </div>
@@ -125,7 +125,7 @@ export default function LoginPage() {
         <form onSubmit={handleMagicLink} className="space-y-3">
           <input
             type="email"
-            placeholder="seu@email.com"
+            placeholder={t("emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -139,15 +139,15 @@ export default function LoginPage() {
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              "Enviar link mágico"
+              t("sendMagicLink")
             )}
           </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground">
-          Não tem conta?{" "}
+          {t("noAccount")}{" "}
           <Link href="/register" className="text-blue-600 hover:underline">
-            Criar conta
+            {t("createAccount")}
           </Link>
         </p>
       </CardContent>

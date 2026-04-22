@@ -7,8 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Mail, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 export default function RegisterPage() {
+  const t = useTranslations("Auth");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -23,15 +25,15 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?terms=1`,
+        emailRedirectTo: `${globalThis.location.origin}/auth/callback?terms=1`,
       },
     });
 
     if (error) {
-      toast.error("Erro ao criar conta. Tente novamente.");
+      toast.error(t("errorCreating"));
     } else {
       setSent(true);
-      toast.success("Link enviado! Verifique seu email.");
+      toast.success(t("linkSent"));
     }
     setLoading(false);
   };
@@ -40,12 +42,12 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?terms=1`,
+        redirectTo: `${globalThis.location.origin}/auth/callback?terms=1`,
         queryParams: { prompt: "select_account" },
       },
     });
     if (error) {
-      toast.error("Erro ao conectar com Google.");
+      toast.error(t("errorGoogle"));
     }
   };
 
@@ -56,18 +58,18 @@ export default function RegisterPage() {
           <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-full bg-green-100">
             <Mail className="h-8 w-8 text-green-600" />
           </div>
-          <h2 className="text-xl font-semibold">Verifique seu email</h2>
+          <h2 className="text-xl font-semibold">{t("checkEmail")}</h2>
           <p className="text-sm text-muted-foreground">
-            Enviamos um link para <strong>{email}</strong>.
-            <br />
-            Clique nele para ativar sua conta.
+            {t.rich("checkEmailRegister", {
+              email: () => <strong>{email}</strong>,
+            })}
           </p>
           <Button
             variant="ghost"
             onClick={() => setSent(false)}
             className="text-sm"
           >
-            Usar outro email
+            {t("useAnotherEmail")}
           </Button>
         </CardContent>
       </Card>
@@ -80,9 +82,9 @@ export default function RegisterPage() {
         <div className="flex justify-center mb-2">
           <FileText className="h-8 w-8 text-blue-600" />
         </div>
-        <CardTitle className="text-2xl">Criar Conta</CardTitle>
+        <CardTitle className="text-2xl">{t("registerTitle")}</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Comece com 5 conversões grátis por mês
+          {t("registerSubtitle")}
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -94,13 +96,13 @@ export default function RegisterPage() {
             className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-blue-600"
           />
           <span className="text-muted-foreground">
-            Li e aceito os{" "}
+            {t("acceptTerms")}{" "}
             <Link href="/termos" className="text-blue-600 hover:underline" target="_blank">
-              Termos de Uso
+              {t("termsLink")}
             </Link>{" "}
-            e a{" "}
+            {t("andThe")}{" "}
             <Link href="/privacidade" className="text-blue-600 hover:underline" target="_blank">
-              Política de Privacidade
+              {t("privacyLink")}
             </Link>
           </span>
         </label>
@@ -129,7 +131,7 @@ export default function RegisterPage() {
               fill="#EA4335"
             />
           </svg>
-          Registrar com Google
+          {t("googleRegister")}
         </Button>
 
         <div className="relative">
@@ -138,7 +140,7 @@ export default function RegisterPage() {
           </div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-white px-2 text-muted-foreground">
-              ou com email
+              {t("orWithEmail")}
             </span>
           </div>
         </div>
@@ -146,7 +148,7 @@ export default function RegisterPage() {
         <form onSubmit={handleRegister} className="space-y-3">
           <input
             type="email"
-            placeholder="seu@email.com"
+            placeholder={t("emailPlaceholder")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -160,15 +162,15 @@ export default function RegisterPage() {
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              "Criar conta com email"
+              t("createWithEmail")
             )}
           </Button>
         </form>
 
         <p className="text-center text-sm text-muted-foreground">
-          Já tem conta?{" "}
+          {t("hasAccount")}{" "}
           <Link href="/login" className="text-blue-600 hover:underline">
-            Entrar
+            {t("signIn")}
           </Link>
         </p>
       </CardContent>

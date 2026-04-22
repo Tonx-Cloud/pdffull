@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Maximize2, Minimize2, Loader2 } from "lucide-react";
+import { FileText, Maximize2, Minimize2, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface PdfViewerModalProps {
@@ -85,7 +85,7 @@ export function PdfViewerModal({
   }, []);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange} disablePointerDismissal>
       <DialogContent
         className={`flex flex-col ${
           fullscreen
@@ -94,13 +94,23 @@ export function PdfViewerModal({
         }`}
       >
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            <span className="truncate">{filename}</span>
+          <DialogTitle className="flex items-center gap-2 pr-8">
+            <FileText className="h-5 w-5 text-blue-600 shrink-0" />
+            <span className="truncate flex-1">{filename}</span>
             <Button
               variant="ghost"
               size="sm"
-              className="ml-auto h-7 w-7 p-0"
+              className="h-7 w-7 p-0 shrink-0"
+              onClick={() => viewUrl && window.open(viewUrl, "_blank")}
+              title="Abrir em nova aba"
+              disabled={!viewUrl}
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 shrink-0"
               onClick={() => setFullscreen(!fullscreen)}
             >
               {fullscreen ? (
@@ -112,21 +122,38 @@ export function PdfViewerModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 min-h-100">
+        <div className="flex-1 min-h-0 overflow-hidden">
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3" style={{ height: "60vh" }}>
+            <div
+              className="flex flex-col items-center justify-center text-muted-foreground gap-3"
+              style={{ height: fullscreen ? "80vh" : "60vh" }}
+            >
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
               <p className="text-sm">Carregando PDF...</p>
             </div>
           ) : viewUrl ? (
-            <iframe
-              src={viewUrl}
-              className="w-full h-full min-h-100 rounded-lg border"
-              style={{ height: fullscreen ? "80vh" : "60vh" }}
-              title={`Visualizar ${filename}`}
-            />
+            <div className="flex flex-col gap-2 h-full">
+              <iframe
+                src={viewUrl}
+                className="w-full rounded-lg border bg-gray-50"
+                style={{ height: fullscreen ? "78vh" : "56vh" }}
+                title={`Visualizar ${filename}`}
+              />
+              <p className="text-xs text-center text-muted-foreground pb-1">
+                PDF não apareceu?{" "}
+                <button
+                  onClick={() => window.open(viewUrl, "_blank")}
+                  className="text-blue-600 hover:underline font-medium"
+                >
+                  Abrir em nova aba
+                </button>
+              </p>
+            </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
+            <div
+              className="flex flex-col items-center justify-center text-muted-foreground gap-3"
+              style={{ height: "60vh" }}
+            >
               <FileText className="h-12 w-12 opacity-30" />
               <p className="text-sm">PDF não disponível para visualização</p>
             </div>

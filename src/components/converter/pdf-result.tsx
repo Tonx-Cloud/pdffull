@@ -13,6 +13,11 @@ const AiAnalysisModal = dynamic(
   { ssr: false }
 );
 
+const PdfViewerModal = dynamic(
+  () => import("@/components/modals/pdf-viewer-modal").then((m) => m.PdfViewerModal),
+  { ssr: false }
+);
+
 interface PdfResultProps {
   pdfBlob: Blob;
   filename: string;
@@ -32,6 +37,7 @@ export function PdfResult({
   const sizeMB = (pdfBlob.size / (1024 * 1024)).toFixed(1);
   const sizeLabel = pdfBlob.size > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
   const [showAi, setShowAi] = useState(false);
+  const [showViewer, setShowViewer] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [currentName, setCurrentName] = useState(filename);
   const t = useTranslations("Result");
@@ -48,10 +54,7 @@ export function PdfResult({
   };
 
   const handleView = () => {
-    const url = URL.createObjectURL(pdfBlob);
-    window.open(url, "_blank");
-    // Revogar depois de um tempo para permitir que a aba carregue
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    setShowViewer(true);
   };
 
   return (
@@ -185,6 +188,13 @@ export function PdfResult({
         <AiAnalysisModal
           open={showAi}
           onOpenChange={setShowAi}
+          pdfBlob={pdfBlob}
+          filename={currentName}
+        />
+
+        <PdfViewerModal
+          open={showViewer}
+          onOpenChange={setShowViewer}
           pdfBlob={pdfBlob}
           filename={currentName}
         />

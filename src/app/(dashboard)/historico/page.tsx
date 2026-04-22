@@ -29,6 +29,11 @@ const AiAnalysisModal = dynamic(
   { ssr: false }
 );
 
+const PdfViewerModal = dynamic(
+  () => import("@/components/modals/pdf-viewer-modal").then((m) => m.PdfViewerModal),
+  { ssr: false }
+);
+
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
   const k = 1024;
@@ -55,6 +60,7 @@ export default function HistoricoPage() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [merging, setMerging] = useState(false);
   const [aiItem, setAiItem] = useState<Conversion | null>(null);
+  const [viewerItem, setViewerItem] = useState<Conversion | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const supabase = createClient();
@@ -371,15 +377,13 @@ export default function HistoricoPage() {
                 </button>
 
                 {c.pdf_url && !c.pdf_url.startsWith("local://") && (
-                  <a
-                    href={c.pdf_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => setViewerItem(c)}
                     className="rounded-lg border p-2 hover:bg-green-50 transition"
                     title="Visualizar PDF"
                   >
                     <Eye className="h-4 w-4 text-green-600" />
-                  </a>
+                  </button>
                 )}
 
                 <button
@@ -433,6 +437,16 @@ export default function HistoricoPage() {
           onOpenChange={(open) => !open && setAiItem(null)}
           pdfUrl={aiItem.pdf_url}
           filename={aiItem.filename}
+        />
+      )}
+
+      {/* Modal Visualizador */}
+      {viewerItem && (
+        <PdfViewerModal
+          open={!!viewerItem}
+          onOpenChange={(open) => !open && setViewerItem(null)}
+          pdfUrl={viewerItem.pdf_url}
+          filename={viewerItem.filename}
         />
       )}
     </div>

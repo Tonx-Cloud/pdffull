@@ -44,6 +44,21 @@ public class LauncherActivity
 
     @Override
     protected Uri getLaunchingUrl() {
+        // PdfHandlerActivity passa TARGET_URL quando o usuário abre um PDF
+        // externo (Abrir com / Compartilhar) → priorizamos essa URL para
+        // carregar /leitor?pdfUrl=... dentro da TWA.
+        android.content.Intent intent = getIntent();
+        if (intent != null) {
+            String target = intent.getStringExtra(PdfHandlerActivity.EXTRA_TARGET_URL);
+            if (target != null && !target.isEmpty()) {
+                return Uri.parse(target);
+            }
+            Uri data = intent.getData();
+            if (data != null && "https".equals(data.getScheme())) {
+                return data;
+            }
+        }
+
         // Get the original launch Url.
         Uri uri = super.getLaunchingUrl();
 

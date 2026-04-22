@@ -3,6 +3,9 @@ import { z } from "zod";
 import { rateLimit, getClientIp } from "@/lib/security";
 import { sanitizeAiOutput } from "@/lib/security";
 
+export const runtime = "nodejs";
+export const maxDuration = 60;
+
 const GEMINI_MODEL = "gemini-2.0-flash";
 
 const ocrSchema = z.object({
@@ -111,6 +114,9 @@ Retorne APENAS o texto extraído em formato Markdown, sem comentários adicionai
   ];
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 55_000);
+
     const geminiRes = await fetch(geminiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -121,7 +127,8 @@ Retorne APENAS o texto extraído em formato Markdown, sem comentários adicionai
           maxOutputTokens: 8192,
         },
       }),
-    });
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeoutId));
 
     if (!geminiRes.ok) {
       const err = await geminiRes.text();
@@ -140,6 +147,12 @@ Retorne APENAS o texto extraído em formato Markdown, sem comentários adicionai
     return NextResponse.json({ text });
   } catch (e) {
     console.error("OCR error:", e);
+    if (e instanceof Error && e.name === "AbortError") {
+      return NextResponse.json(
+        { error: "O OCR demorou mais que o permitido. Tente um arquivo menor." },
+        { status: 504 }
+      );
+    }
     return NextResponse.json(
       { error: "Erro ao processar OCR" },
       { status: 500 }

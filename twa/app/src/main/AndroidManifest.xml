@@ -22,6 +22,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="app.vercel.pdffull.twa">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     
 
     
@@ -155,6 +157,28 @@
             
 
             
+        </activity>
+
+        <!-- Recebe arquivos PDF do sistema (Abrir com / Compartilhar) -->
+        <activity
+            android:name=".PdfHandlerActivity"
+            android:exported="true"
+            android:label="@string/launcherName"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+
+            <intent-filter android:label="@string/launcherName">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" android:mimeType="application/pdf" />
+                <data android:scheme="file" android:mimeType="application/pdf" />
+            </intent-filter>
+
+            <intent-filter android:label="@string/launcherName">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/pdf" />
+            </intent-filter>
         </activity>
 
         <activity android:name="com.google.androidbrowserhelper.trusted.FocusActivity" />

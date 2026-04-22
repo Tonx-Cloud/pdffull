@@ -1,12 +1,29 @@
-const CACHE_NAME = "pdffull-v2";
+const CACHE_NAME = "pdffull-v3";
 const SHARED_FILES_CACHE = "shared-files";
 const STATIC_ASSETS = ["/manifest.json"];
+
+// Garante que o respondWith sempre receba um Response válido.
+async function safeMatch(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  return new Response("", {
+    status: 504,
+    statusText: "Offline and not cached",
+  });
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
   );
   self.skipWaiting();
+});
+
+// Permite ao client forçar ativação imediata da nova versão
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener("activate", (event) => {
@@ -41,18 +58,21 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Navegação (páginas HTML) → Network-first com fallback cache
+  // Navegação (páginas HTML) → Network-only com fallback 504.
+  // Não cacheamos HTML para evitar mismatch de hidratação do React
+  // (HTML antigo + JS novo após deploy). O Next.js já cacheia os assets estáticos.
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, clone);
-          });
-          return response;
-        })
-        .catch(() => caches.match(event.request))
+      fetch(event.request).catch(
+        () =>
+          new Response(
+            "<h1>Sem conexão</h1><p>Tente novamente quando estiver online.</p>",
+            {
+              status: 504,
+              headers: { "Content-Type": "text/html; charset=utf-8" },
+            }
+          )
+      )
     );
     return;
   }
@@ -67,9 +87,9 @@ self.addEventListener("fetch", (event) => {
   ) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
-        return (
-          cached ||
-          fetch(event.request).then((response) => {
+        if (cached) return cached;
+        return fetch(event.request)
+          .then((response) => {
             if (response.status === 200) {
               const clone = response.clone();
               caches.open(CACHE_NAME).then((cache) => {
@@ -78,7 +98,7 @@ self.addEventListener("fetch", (event) => {
             }
             return response;
           })
-        );
+          .catch(() => safeMatch(event.request));
       })
     );
     return;
@@ -96,7 +116,7 @@ self.addEventListener("fetch", (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => safeMatch(event.request))
   );
 });
 

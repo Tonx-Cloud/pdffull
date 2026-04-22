@@ -69,6 +69,38 @@ export default function LeitorPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sharedFiles]);
 
+  // Receber PDF via URL remota (TWA Android Intent handler → /leitor?pdfUrl=...)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const remoteUrl = params.get("pdfUrl");
+    if (!remoteUrl) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(remoteUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        if (cancelled) return;
+        const name =
+          decodeURIComponent(remoteUrl.split("/").pop() || "documento.pdf")
+            .replace(/\?.*$/, "") || "documento.pdf";
+        loadPdf(blob, name);
+        // Limpar query param para evitar re-carga ao navegar
+        const url = new URL(window.location.href);
+        url.searchParams.delete("pdfUrl");
+        window.history.replaceState({}, "", url.pathname + url.search);
+      } catch (err) {
+        console.error("[Leitor] Erro ao baixar PDF remoto:", err);
+        toast.error("Não foi possível carregar o PDF recebido.");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   function loadPdf(file: Blob, name: string) {
     if (blobUrlRef.current) {
       URL.revokeObjectURL(blobUrlRef.current);

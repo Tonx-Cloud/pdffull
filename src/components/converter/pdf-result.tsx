@@ -13,11 +13,6 @@ const AiAnalysisModal = dynamic(
   { ssr: false }
 );
 
-const PdfViewerModal = dynamic(
-  () => import("@/components/modals/pdf-viewer-modal").then((m) => m.PdfViewerModal),
-  { ssr: false }
-);
-
 interface PdfResultProps {
   pdfBlob: Blob;
   filename: string;
@@ -37,7 +32,6 @@ export function PdfResult({
   const sizeMB = (pdfBlob.size / (1024 * 1024)).toFixed(1);
   const sizeLabel = pdfBlob.size > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
   const [showAi, setShowAi] = useState(false);
-  const [showViewer, setShowViewer] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [currentName, setCurrentName] = useState(filename);
   const t = useTranslations("Result");
@@ -51,6 +45,13 @@ export function PdfResult({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleView = () => {
+    const url = URL.createObjectURL(pdfBlob);
+    window.open(url, "_blank");
+    // Revogar depois de um tempo para permitir que a aba carregue
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
   };
 
   return (
@@ -132,20 +133,30 @@ export function PdfResult({
         <Button
           variant="outline"
           className="w-full gap-2"
-          onClick={() => setShowViewer(true)}
+          onClick={handleView}
         >
           <Eye className="h-4 w-4" />
           {t("viewPdf")}
         </Button>
 
-        <Button
-          variant="outline"
-          className="w-full gap-2"
-          onClick={() => setShowAi(true)}
-        >
-          <Sparkles className="h-4 w-4" />
-          {t("aiAnalysis")}
-        </Button>
+        {isAnon ? (
+          <a
+            href="/login?next=/converter"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
+          >
+            <Sparkles className="h-4 w-4" />
+            {t("aiAnalysis")}
+          </a>
+        ) : (
+          <Button
+            variant="outline"
+            className="w-full gap-2"
+            onClick={() => setShowAi(true)}
+          >
+            <Sparkles className="h-4 w-4" />
+            {t("aiAnalysis")}
+          </Button>
+        )}
 
         <Button
           variant="ghost"
@@ -174,13 +185,6 @@ export function PdfResult({
         <AiAnalysisModal
           open={showAi}
           onOpenChange={setShowAi}
-          pdfBlob={pdfBlob}
-          filename={currentName}
-        />
-
-        <PdfViewerModal
-          open={showViewer}
-          onOpenChange={setShowViewer}
           pdfBlob={pdfBlob}
           filename={currentName}
         />

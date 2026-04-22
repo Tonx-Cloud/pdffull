@@ -85,8 +85,28 @@ export default async function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js').then(reg => {
+                  navigator.serviceWorker.register('/sw.js').then((reg) => {
                     reg.update();
+                    // Quando uma nova versão terminar de instalar, ativar imediatamente
+                    reg.addEventListener('updatefound', () => {
+                      const installing = reg.installing;
+                      if (!installing) return;
+                      installing.addEventListener('statechange', () => {
+                        if (
+                          installing.state === 'installed' &&
+                          navigator.serviceWorker.controller
+                        ) {
+                          installing.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                      });
+                    });
+                  });
+                  // Recarregar uma vez quando o novo SW assumir o controle
+                  let reloaded = false;
+                  navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (reloaded) return;
+                    reloaded = true;
+                    window.location.reload();
                   });
                 });
               }

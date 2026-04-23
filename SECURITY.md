@@ -80,6 +80,25 @@ Cumprindo essas regras, **não tomaremos ações legais** contra divulgação re
 
 _(Aguardando primeiros reports.)_
 
+## 📋 Achados aceitos (triagem)
+
+Findings de ferramentas SAST que foram analisados e **classificados como aceitos** (falso-positivo ou by-design), com justificativa:
+
+### Android — `activity android:exported="true"`
+
+- **Arquivos:** `twa/app/src/main/AndroidManifest.xml`
+  - `LauncherActivity` (gerada por Bubblewrap/TWA)
+  - `PdfHandlerActivity` (file handler para "Abrir PDF com PDFfULL")
+- **Regra:** Semgrep `java.android.security.android-manifest-exported-activity` (CWE-926)
+- **Severidade reportada:** HIGH
+- **Status:** **Aceito (by-design).**
+- **Justificativa:** Ambas as activities **precisam** ser `exported="true"`:
+  - `LauncherActivity` é o entry-point do TWA (sem ela, o app não abre pela gaveta de apps nem recebe intents `ACTION_VIEW` do navegador).
+  - `PdfHandlerActivity` registra o app como handler do MIME `application/pdf` via `intent-filter`, funcionalidade essencial do produto.
+  - Nenhuma activity exposta acessa dados privilegiados: ambas apenas delegam para a WebView Custom Tab do PWA, que executa sob o mesmo modelo de segurança do navegador (origem controlada via Digital Asset Links).
+
+- **Revisão:** 2026-04-23
+
 ---
 
 Obrigado por ajudar a manter o PDFfull seguro. 🛡️

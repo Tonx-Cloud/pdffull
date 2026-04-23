@@ -48,5 +48,9 @@
     "pg": "^8.20.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "fast-xml-parser": "^5.7.0",
+    "uuid": "^14.0.0"
   }
 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = "pdffull-v3";
+const CACHE_NAME = "pdffull-v4";
 const SHARED_FILES_CACHE = "shared-files";
 const STATIC_ASSETS = ["/manifest.json"];
 
@@ -49,8 +49,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Ignorar requisições de API, auth e extensões do browser
+  // Ignorar requisições de API, auth, extensões do browser e qualquer
+  // origem diferente da nossa (vercel.live feedback, supabase, mercadopago, etc.)
   if (
+    url.origin !== self.location.origin ||
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/auth/") ||
     url.protocol === "chrome-extension:"

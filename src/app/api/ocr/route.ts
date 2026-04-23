@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { rateLimit, getClientIp } from "@/lib/security";
-import { sanitizeAiOutput } from "@/lib/security";
+import { rateLimit, getClientIp, sanitizeAiOutput } from "@/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -9,9 +8,9 @@ export const maxDuration = 60;
 const GEMINI_MODEL = "gemini-2.0-flash";
 
 const ocrSchema = z.object({
-  imageBase64: z.string().optional(),
-  mimeType: z.string().optional(),
-  pdfUrl: z.string().url().optional(),
+  imageBase64: z.string().nullish(),
+  mimeType: z.string().nullish(),
+  pdfUrl: z.url().nullish(),
 });
 
 function getGeminiUrl(): string | null {
@@ -48,7 +47,7 @@ export async function POST(request: NextRequest) {
   const parsed = ocrSchema.safeParse(rawBody);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Dados inválidos", details: parsed.error.flatten() },
+      { error: "Dados inválidos", details: z.treeifyError(parsed.error) },
       { status: 400 }
     );
   }

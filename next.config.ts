@@ -20,12 +20,12 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live",
+      "style-src 'self' 'unsafe-inline' https://vercel.live",
       "img-src 'self' data: blob: https:",
-      "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com https://api.mercadopago.com",
-      "frame-src 'self' blob: https://www.mercadopago.com.br https://sdk.mercadopago.com",
+      "font-src 'self' data: https://vercel.live https://assets.vercel.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://generativelanguage.googleapis.com https://api.mercadopago.com https://vercel.live wss://ws-us3.pusher.com",
+      "frame-src 'self' blob: https://www.mercadopago.com.br https://sdk.mercadopago.com https://vercel.live",
     ].join("; "),
   },
 ];

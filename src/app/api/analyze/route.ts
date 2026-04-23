@@ -1,17 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
-import { rateLimit, getClientIp } from "@/lib/security";
-import { sanitizeUserPrompt, sanitizeAiOutput } from "@/lib/security";
+import {
+  rateLimit,
+  getClientIp,
+  sanitizeUserPrompt,
+  sanitizeAiOutput,
+} from "@/lib/security";
 
 const GEMINI_MODEL = "gemini-2.0-flash";
 
 const analyzeSchema = z.object({
-  pdfBase64: z.string().optional(),
-  pdfUrl: z.string().url().optional(),
+  pdfBase64: z.string().nullish(),
+  pdfUrl: z.url().nullish(),
   messages: z
     .array(z.object({ role: z.string(), text: z.string().max(4000) }))
-    .optional(),
+    .nullish(),
 });
 
 function getGeminiUrl(): string | null {
@@ -57,7 +61,7 @@ export async function POST(request: NextRequest) {
   const parsed = analyzeSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Dados inválidos", details: parsed.error.flatten() },
+      { error: "Dados inválidos", details: z.treeifyError(parsed.error) },
       { status: 400 }
     );
   }
@@ -105,8 +109,8 @@ export async function POST(request: NextRequest) {
 
   // Se temos histórico de chat, usar como conversa
   if (messages && messages.length > 0) {
-    const lastMessage = messages[messages.length - 1];
-    parts.push({ text: lastMessage.text });
+    const lastMessage = messages.at(-1);
+    if (lastMessage) parts.push({ text: lastMessage.text });
   } else {
     // Análise inicial
     parts.push({

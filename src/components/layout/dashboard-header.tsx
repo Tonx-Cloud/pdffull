@@ -75,13 +75,13 @@ export function DashboardHeader() {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden sm:flex items-center gap-3 text-sm">
+        <nav className="hidden md:flex items-center gap-3 text-sm">
           {navLinks}
         </nav>
 
         {/* Mobile hamburger */}
         <button
-          className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition"
+          className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Menu"
         >
@@ -95,7 +95,7 @@ export function DashboardHeader() {
 
       {/* Mobile menu dropdown */}
       {menuOpen && (
-        <nav className="sm:hidden absolute left-0 right-0 top-full bg-white border-b shadow-lg z-50 px-4 py-4 flex flex-col gap-3 text-sm">
+        <nav className="md:hidden absolute left-0 right-0 top-full bg-white border-b shadow-lg z-50 px-4 py-4 flex flex-col gap-3 text-sm">
           {navLinks}
         </nav>
       )}

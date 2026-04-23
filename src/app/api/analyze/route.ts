@@ -153,21 +153,39 @@ Seja conciso mas informativo. Se o PDF contiver imagens de texto (scan/foto), te
   }
 
   try {
-    const geminiRes = await fetch(geminiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents,
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 4096,
-        },
-      }),
-    });
+    // Gemini free tier: 15 RPM / 1500 RPD. Em caso de 429/503 fazemos
+    // 1 retry com backoff curto para absorver picos passageiros.
+    const callGemini = () =>
+      fetch(geminiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents,
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 4096,
+          },
+        }),
+      });
+
+    let geminiRes = await callGemini();
+    if (geminiRes.status === 429 || geminiRes.status === 503) {
+      await new Promise((r) => setTimeout(r, 1200));
+      geminiRes = await callGemini();
+    }
 
     if (!geminiRes.ok) {
       const err = await geminiRes.text();
       console.error("Gemini API error:", geminiRes.status, err);
+      if (geminiRes.status === 429) {
+        return NextResponse.json(
+          {
+            error:
+              "A IA está recebendo muitas requisições no momento. Aguarde alguns segundos e tente novamente.",
+          },
+          { status: 429 }
+        );
+      }
       return NextResponse.json(
         { error: `Erro ao analisar com IA (${geminiRes.status})` },
         { status: 502 }

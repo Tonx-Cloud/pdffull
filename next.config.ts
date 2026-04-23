@@ -21,6 +21,7 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live",
+      "worker-src 'self' blob:",
       "style-src 'self' 'unsafe-inline' https://vercel.live",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://vercel.live https://assets.vercel.com",

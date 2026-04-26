@@ -1,10 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Download, RotateCcw, UserPlus, Pencil, Check, Eye } from "lucide-react";
+import { Download, RotateCcw, UserPlus, Pencil, Check, Eye, Lock, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShareMenu } from "@/components/pwa/share-menu";
+import { AuthRequiredModal } from "@/components/modals/auth-required-modal";
+import { savePendingPdf } from "@/lib/pdf/pending-pdf";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -34,6 +36,7 @@ export function PdfResult({
   const [showViewer, setShowViewer] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [currentName, setCurrentName] = useState(filename);
+  const [authModal, setAuthModal] = useState<null | "download" | "share">(null);
   const t = useTranslations("Result");
 
   const handleDownload = () => {
@@ -49,6 +52,16 @@ export function PdfResult({
 
   const handleView = () => {
     setShowViewer(true);
+  };
+
+  const requestAuth = async (action: "download" | "share") => {
+    // Persistir PDF para restaurar após login/cadastro
+    try {
+      await savePendingPdf(pdfBlob, currentName, pageCount);
+    } catch {
+      // Se falhar (modo privado etc.), seguimos com o modal mesmo assim
+    }
+    setAuthModal(action);
   };
 
   return (
@@ -119,12 +132,23 @@ export function PdfResult({
         <div className="flex w-full gap-2">
           <Button
             className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700"
-            onClick={handleDownload}
+            onClick={isAnon ? () => requestAuth("download") : handleDownload}
           >
-            <Download className="h-4 w-4" />
+            {isAnon ? <Lock className="h-4 w-4" /> : <Download className="h-4 w-4" />}
             {t("downloadPdf")}
           </Button>
-          <ShareMenu pdfBlob={pdfBlob} filename={currentName} />
+          {isAnon ? (
+            <Button
+              variant="outline"
+              className="flex-1 gap-2"
+              onClick={() => requestAuth("share")}
+            >
+              <Share2 className="h-4 w-4" />
+              {t("share")}
+            </Button>
+          ) : (
+            <ShareMenu pdfBlob={pdfBlob} filename={currentName} />
+          )}
         </div>
 
         <Button
@@ -146,18 +170,17 @@ export function PdfResult({
         </Button>
 
         {isAnon && (
-          <a
-            href="/register"
+          <button
+            type="button"
+            onClick={() => requestAuth("download")}
             className="w-full rounded-xl border-2 border-blue-200 bg-blue-50 p-4 text-center hover:bg-blue-100 transition block"
           >
             <div className="flex items-center justify-center gap-2 text-blue-700 font-medium text-sm">
               <UserPlus className="h-4 w-4" />
               {t("signUpCta")}
             </div>
-            <p className="text-xs text-blue-600 mt-1">
-              {t("signUpCtaDesc")}
-            </p>
-          </a>
+            <p className="text-xs text-blue-600 mt-1">{t("signUpCtaDesc")}</p>
+          </button>
         )}
 
         <PdfViewerModal
@@ -165,6 +188,15 @@ export function PdfResult({
           onOpenChange={setShowViewer}
           pdfBlob={pdfBlob}
           filename={currentName}
+        />
+
+        <AuthRequiredModal
+          open={authModal !== null}
+          onOpenChange={(o) => {
+            if (!o) setAuthModal(null);
+          }}
+          action={authModal ?? "download"}
+          redirectTo="/converter"
         />
       </CardContent>
     </Card>

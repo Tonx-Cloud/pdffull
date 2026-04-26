@@ -132,16 +132,29 @@
     "errorConvert": "Conversion failed. Please try again.",
     "success": "PDF generated successfully!",
     "pdfReceived": "PDF received!",
+    "pdfRestored": "PDF restored. You can now download.",
     "imagesCount": "{count, plural, one {image} other {images}}",
     "pages": "{count, plural, one {page} other {pages}}"
   },
   "Result": {
     "pdfGenerated": "PDF Generated!",
     "downloadPdf": "Download PDF",
+    "share": "Share",
     "viewPdf": "View PDF",
     "newConversion": "New conversion",
-    "signUpCta": "Sign up free and get +3 conversions",
-    "signUpCtaDesc": "Save to cloud, share and access history"
+    "signUpCta": "Sign up free to download",
+    "signUpCtaDesc": "Takes 30 seconds. Login with Google or email."
+  },
+  "AuthRequired": {
+    "titleDownload": "Sign up free to download",
+    "titleShare": "Sign up free to share",
+    "subtitle": "Your PDF is ready. To download or share, please sign in — takes 30 seconds.",
+    "benefit1": "5 free conversions per month",
+    "benefit2": "History saved in the cloud",
+    "benefit3": "No credit card required",
+    "ctaRegister": "Create free account",
+    "ctaLogin": "I already have an account",
+    "note": "Your PDF will be available when you return."
   },
   "History": {
     "title": "History",

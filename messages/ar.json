@@ -132,16 +132,29 @@
     "errorConvert": "خطأ في التحويل، حاول مرة أخرى.",
     "success": "تم إنشاء PDF بنجاح!",
     "pdfReceived": "تم استلام PDF!",
+    "pdfRestored": "تمت استعادة PDF. يمكنك الآن التنزيل.",
     "imagesCount": "{count, plural, one {صورة} other {صور}}",
     "pages": "{count, plural, one {صفحة} other {صفحات}}"
   },
   "Result": {
     "pdfGenerated": "تم إنشاء PDF!",
     "downloadPdf": "تنزيل PDF",
+    "share": "مشاركة",
     "viewPdf": "عرض PDF",
     "newConversion": "تحويل جديد",
-    "signUpCta": "سجّل مجاناً واحصل على +3 تحويلات",
-    "signUpCtaDesc": "احفظ في السحابة وشارك واطلع على السجل"
+    "signUpCta": "سجّل مجاناً للتنزيل",
+    "signUpCtaDesc": "يستغرق 30 ثانية. تسجيل بجوجل أو البريد."
+  },
+  "AuthRequired": {
+    "titleDownload": "سجّل مجاناً للتنزيل",
+    "titleShare": "سجّل مجاناً للمشاركة",
+    "subtitle": "ملف PDF جاهز. للتنزيل أو المشاركة، سجّل الدخول — 30 ثانية فقط.",
+    "benefit1": "5 تحويلات مجانية شهرياً",
+    "benefit2": "سجل محفوظ في السحابة",
+    "benefit3": "بدون بطاقة ائتمان",
+    "ctaRegister": "إنشاء حساب مجاني",
+    "ctaLogin": "لديّ حساب",
+    "note": "سيكون PDF متاحاً عند عودتك."
   },
   "History": {
     "title": "السجل",

@@ -132,16 +132,29 @@
     "errorConvert": "Erro ao converter. Tente novamente.",
     "success": "PDF gerado com sucesso!",
     "pdfReceived": "PDF recebido!",
+    "pdfRestored": "PDF restaurado. Agora você pode baixar.",
     "imagesCount": "{count, plural, one {imagem} other {imagens}}",
     "pages": "{count, plural, one {página} other {páginas}}"
   },
   "Result": {
     "pdfGenerated": "PDF Gerado!",
     "downloadPdf": "Baixar PDF",
+    "share": "Compartilhar",
     "viewPdf": "Visualizar PDF",
     "newConversion": "Nova conversão",
-    "signUpCta": "Cadastre-se grátis e ganhe +3 conversões",
-    "signUpCtaDesc": "Salve na nuvem, compartilhe e acesse o histórico"
+    "signUpCta": "Crie sua conta grátis para baixar",
+    "signUpCtaDesc": "Leva 30 segundos. Login com Google ou e-mail."
+  },
+  "AuthRequired": {
+    "titleDownload": "Crie sua conta grátis para baixar",
+    "titleShare": "Crie sua conta grátis para compartilhar",
+    "subtitle": "Seu PDF já está pronto. Para baixar ou compartilhar, faça login — leva 30 segundos.",
+    "benefit1": "5 conversões grátis por mês",
+    "benefit2": "Histórico salvo na nuvem",
+    "benefit3": "Sem cartão de crédito",
+    "ctaRegister": "Criar conta grátis",
+    "ctaLogin": "Já tenho conta",
+    "note": "Seu PDF ficará disponível ao voltar."
   },
   "History": {
     "title": "Histórico",

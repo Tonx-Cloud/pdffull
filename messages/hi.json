@@ -132,16 +132,29 @@
     "errorConvert": "कनवर्ट करने में त्रुटि। पुन: प्रयास करें।",
     "success": "PDF सफलतापूर्वक बन गया!",
     "pdfReceived": "PDF प्राप्त हुआ!",
+    "pdfRestored": "PDF पुनः प्राप्त। अब डाउनलोड कर सकते हैं।",
     "imagesCount": "{count, plural, one {इमेज} other {इमेज}}",
     "pages": "{count, plural, one {पेज} other {पेज}}"
   },
   "Result": {
     "pdfGenerated": "PDF बन गया!",
     "downloadPdf": "PDF डाउनलोड करें",
+    "share": "शेयर करें",
     "viewPdf": "PDF देखें",
     "newConversion": "नया कनवर्शन",
-    "signUpCta": "मुफ़्त साइन अप करें और +3 कनवर्शन पाएं",
-    "signUpCtaDesc": "क्लाउड में सहेजें, साझा करें और इतिहास देखें"
+    "signUpCta": "डाउनलोड के लिए मुफ़्त साइन अप करें",
+    "signUpCtaDesc": "30 सेकंड लगते हैं। Google या ईमेल से लॉगिन।"
+  },
+  "AuthRequired": {
+    "titleDownload": "डाउनलोड के लिए मुफ़्त साइन अप करें",
+    "titleShare": "शेयर के लिए मुफ़्त साइन अप करें",
+    "subtitle": "आपका PDF तैयार है। डाउनलोड या शेयर के लिए लॉगिन करें — 30 सेकंड लगते हैं।",
+    "benefit1": "प्रति माह 5 मुफ़्त कनवर्शन",
+    "benefit2": "क्लाउड में इतिहास सहेजें",
+    "benefit3": "क्रेडिट कार्ड की ज़रूरत नहीं",
+    "ctaRegister": "मुफ़्त खाता बनाएं",
+    "ctaLogin": "मेरा पहले से खाता है",
+    "note": "वापस आने पर आपका PDF उपलब्ध होगा।"
   },
   "History": {
     "title": "इतिहास",

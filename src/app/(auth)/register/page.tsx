@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,9 @@ import { useTranslations } from "next-intl";
 
 export default function RegisterPage() {
   const t = useTranslations("Auth");
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/converter";
+  const callbackUrl = `${globalThis.location?.origin ?? ""}/auth/callback?terms=1&next=${encodeURIComponent(next)}`;
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -25,7 +29,7 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: `${globalThis.location.origin}/auth/callback?terms=1`,
+        emailRedirectTo: callbackUrl,
       },
     });
 
@@ -42,7 +46,7 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${globalThis.location.origin}/auth/callback?terms=1`,
+        redirectTo: callbackUrl,
         queryParams: { prompt: "select_account" },
       },
     });

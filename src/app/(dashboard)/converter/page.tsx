@@ -15,6 +15,7 @@ import { UpgradeModal } from "@/components/modals/upgrade-modal";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
+import { loadPendingPdf, clearPendingPdf } from "@/lib/pdf/pending-pdf";
 
 type Stage = "capture" | "processing" | "done";
 
@@ -46,10 +47,26 @@ export default function ConverterPage() {
   // Verificar se está logado
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsLoggedIn(!!user);
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      const logged = !!user;
+      setIsLoggedIn(logged);
+      // Se acabou de logar/cadastrar, restaurar PDF que estava pendente
+      if (logged) {
+        try {
+          const pending = await loadPendingPdf();
+          if (pending) {
+            setPdfBlob(pending.blob);
+            setPdfFilename(pending.filename);
+            setStage("done");
+            await clearPendingPdf();
+            toast.success(t("pdfRestored"));
+          }
+        } catch {
+          // ignore
+        }
+      }
     });
-  }, []);
+  }, [t]);
 
   const handleCapture = useCallback((files: File[]) => {
     setImages((prev) => [...prev, ...files]);

@@ -132,16 +132,29 @@
     "errorConvert": "转换失败，请重试。",
     "success": "PDF生成成功！",
     "pdfReceived": "已接收PDF！",
+    "pdfRestored": "PDF已恢复。现在可以下载。",
     "imagesCount": "{count, plural, other {张图片}}",
     "pages": "{count, plural, other {页}}"
   },
   "Result": {
     "pdfGenerated": "PDF已生成！",
     "downloadPdf": "下载PDF",
+    "share": "分享",
     "viewPdf": "查看PDF",
     "newConversion": "新建转换",
-    "signUpCta": "免费注册，获得额外3次转换",
-    "signUpCtaDesc": "保存到云端、分享并查看历史"
+    "signUpCta": "免费注册以下载",
+    "signUpCtaDesc": "仅需 30 秒。使用 Google 或邮箱登录。"
+  },
+  "AuthRequired": {
+    "titleDownload": "免费注册以下载",
+    "titleShare": "免费注册以分享",
+    "subtitle": "您的 PDF 已准备就绪。要下载或分享，请登录 — 仅需 30 秒。",
+    "benefit1": "每月 5 次免费转换",
+    "benefit2": "历史记录保存在云端",
+    "benefit3": "无需信用卡",
+    "ctaRegister": "创建免费账户",
+    "ctaLogin": "我已有账户",
+    "note": "返回后您的 PDF 仍可用。"
   },
   "History": {
     "title": "历史记录",

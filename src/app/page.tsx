@@ -25,21 +25,21 @@ export default function Home() {
           <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
             <Link
               href="/sobre"
-              className="flex items-center gap-1.5 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
             >
               <Info className="h-4 w-4" />
               {t("navAbout")}
             </Link>
             <Link
               href="/faq"
-              className="flex items-center gap-1.5 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
             >
               <HelpCircle className="h-4 w-4" />
               {t("navFaq")}
             </Link>
             <Link
               href="/leitor"
-              className="flex items-center gap-1.5 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
             >
               <BookOpen className="h-4 w-4" />
               {t("navReader")}
@@ -49,15 +49,15 @@ export default function Home() {
           {/* Ações (desktop) */}
           <div className="hidden md:flex items-center gap-2">
             <LanguageSelector />
-            <div className="h-6 w-px bg-border" aria-hidden />
+            <span className="mx-1 h-5 w-px bg-gray-300" aria-hidden />
             <Link href="/login">
-              <Button variant="ghost" size="sm" className="gap-1.5">
+              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
                 <LogIn className="h-4 w-4" />
                 {t("navLogin")}
               </Button>
             </Link>
             <Link href="/converter">
-              <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700 shadow-sm">
+              <Button size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-sm font-semibold px-4">
                 <Camera className="h-4 w-4" />
                 {t("navConvertNow")}
               </Button>

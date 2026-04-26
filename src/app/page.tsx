@@ -1,4 +1,4 @@
-import { FileText, Camera, Zap, Shield, ArrowRight, CheckCircle, Layers, Globe, BookOpen } from "lucide-react";
+import { FileText, Camera, Zap, Shield, ArrowRight, CheckCircle, Layers, Globe, BookOpen, Smartphone, Cpu, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PwaInstallButton } from "@/components/pwa/pwa-install-button";
@@ -83,9 +83,51 @@ export default function Home() {
           <p className="text-sm text-muted-foreground">
             {t("freeTrialNote")}
           </p>
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+            <Shield className="h-3.5 w-3.5" />
+            {t("localBadge")}
+          </div>
           <div className="flex gap-2 mt-2">
             <PwaInstallButton />
             <PwaShareButton />
+          </div>
+        </section>
+
+        {/* Fluxo de dados — Local-first transparente */}
+        <section className="border-t bg-white px-4 py-12">
+          <div className="mx-auto max-w-4xl text-center mb-8">
+            <h2 className="text-2xl font-bold">{t("flowTitle")}</h2>
+            <p className="text-muted-foreground mt-2 text-sm max-w-2xl mx-auto">
+              {t("flowSubtitle")}
+            </p>
+          </div>
+          <div className="mx-auto max-w-3xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex flex-col items-center text-center gap-2 flex-1">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100">
+                <Smartphone className="h-7 w-7 text-blue-600" />
+              </div>
+              <p className="text-sm font-medium">{t("flowStep1")}</p>
+            </div>
+            <ArrowRight className="hidden md:block h-5 w-5 text-muted-foreground shrink-0" aria-hidden />
+            <div className="flex flex-col items-center text-center gap-2 flex-1">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100">
+                <Cpu className="h-7 w-7 text-emerald-600" />
+              </div>
+              <p className="text-sm font-medium">{t("flowStep2")}</p>
+            </div>
+            <ArrowRight className="hidden md:block h-5 w-5 text-muted-foreground shrink-0" aria-hidden />
+            <div className="flex flex-col items-center text-center gap-2 flex-1">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100">
+                <Lock className="h-7 w-7 text-purple-600" />
+              </div>
+              <p className="text-sm font-medium">{t("flowStep3")}</p>
+            </div>
+          </div>
+          <div className="mt-6 text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700">
+              <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+              {t("flowLgpd")}
+            </span>
           </div>
         </section>
 

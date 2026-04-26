@@ -12,7 +12,17 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Build/setup scripts (CommonJS, ran via node)
+    "scripts/**",
   ]),
+  // Relax opinionated React 19 rules that flag valid sync-from-external patterns.
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    rules: {
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/immutability": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

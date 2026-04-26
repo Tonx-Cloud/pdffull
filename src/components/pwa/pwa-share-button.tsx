@@ -13,7 +13,6 @@ export function PwaShareButton({ className }: Readonly<{ className?: string }>) 
 
   useEffect(() => {
     // Detecção pós-hidratação: necessário para evitar mismatch SSR/CSR (React #418)
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     setCanShare(typeof navigator !== "undefined" && typeof navigator.share === "function");
   }, []);

@@ -10,38 +10,45 @@ export default function Home() {
   const t = useTranslations("Landing");
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header — Navegação completa para sitelinks do Google */}
-      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
+      {/* Header — SaaS-style com pill buttons, gradient CTA e profundidade sutil */}
+      <header className="sticky top-0 z-50 bg-[#F8F9FB]/85 backdrop-blur-md shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.08)]">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 shadow-[0_4px_12px_-2px_rgba(37,99,235,0.4)]">
               <FileText className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold text-blue-600">PDFfULL</span>
+            <span className="text-lg font-bold tracking-tight text-blue-600">PDFfULL</span>
           </Link>
 
-          {/* Nav secundária (desktop) */}
-          <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
+          {/* Nav secundária (desktop) — pill buttons com ícone + borda + hover suave */}
+          <nav className="hidden md:flex items-center gap-2 text-sm font-medium">
             <Link
               href="/sobre"
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white/70 px-3.5 py-2 text-gray-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:bg-white hover:text-blue-600 hover:shadow-[0_2px_8px_-2px_rgba(15,23,42,0.08)] hover:-translate-y-px"
             >
-              <Info className="h-4 w-4" />
+              <Info className="h-4 w-4 stroke-[1.75]" />
               {t("navAbout")}
             </Link>
             <Link
               href="/faq"
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white/70 px-3.5 py-2 text-gray-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:bg-white hover:text-blue-600 hover:shadow-[0_2px_8px_-2px_rgba(15,23,42,0.08)] hover:-translate-y-px"
             >
-              <HelpCircle className="h-4 w-4" />
+              <HelpCircle className="h-4 w-4 stroke-[1.75]" />
               {t("navFaq")}
             </Link>
             <Link
-              href="/leitor"
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
+              href="/converter"
+              className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white/70 px-3.5 py-2 text-gray-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:bg-white hover:text-blue-600 hover:shadow-[0_2px_8px_-2px_rgba(15,23,42,0.08)] hover:-translate-y-px"
             >
-              <BookOpen className="h-4 w-4" />
+              <Camera className="h-4 w-4 stroke-[1.75]" />
+              {t("navConverter")}
+            </Link>
+            <Link
+              href="/leitor"
+              className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white/70 px-3.5 py-2 text-gray-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:bg-white hover:text-blue-600 hover:shadow-[0_2px_8px_-2px_rgba(15,23,42,0.08)] hover:-translate-y-px"
+            >
+              <BookOpen className="h-4 w-4 stroke-[1.75]" />
               {t("navReader")}
             </Link>
           </nav>
@@ -49,16 +56,22 @@ export default function Home() {
           {/* Ações (desktop) */}
           <div className="hidden md:flex items-center gap-2">
             <LanguageSelector />
-            <span className="mx-1 h-5 w-px bg-gray-300" aria-hidden />
             <Link href="/login">
-              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
-                <LogIn className="h-4 w-4" />
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 rounded-xl border-[#E5E7EB] bg-white/70 px-3.5 py-2 h-auto text-gray-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:bg-white hover:text-blue-600 hover:shadow-[0_2px_8px_-2px_rgba(15,23,42,0.08)] hover:-translate-y-px"
+              >
+                <LogIn className="h-4 w-4 stroke-[1.75]" />
                 {t("navLogin")}
               </Button>
             </Link>
             <Link href="/converter">
-              <Button size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700 shadow-sm font-semibold px-4">
-                <Camera className="h-4 w-4" />
+              <Button
+                size="sm"
+                className="gap-2 rounded-xl h-auto px-4 py-2 font-semibold text-white bg-gradient-to-b from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] shadow-[0_6px_16px_-4px_rgba(37,99,235,0.5),0_2px_4px_rgba(37,99,235,0.25),inset_0_1px_0_rgba(255,255,255,0.15)] transition-all hover:-translate-y-px hover:shadow-[0_10px_24px_-6px_rgba(37,99,235,0.55),0_2px_4px_rgba(37,99,235,0.3)]"
+              >
+                <Camera className="h-4 w-4 stroke-[1.75]" />
                 {t("navConvertNow")}
               </Button>
             </Link>
@@ -68,7 +81,10 @@ export default function Home() {
           <div className="flex md:hidden items-center gap-2">
             <LanguageSelector />
             <Link href="/converter">
-              <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700">
+              <Button
+                size="sm"
+                className="gap-1.5 rounded-xl font-semibold text-white bg-gradient-to-b from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] shadow-[0_4px_12px_-2px_rgba(37,99,235,0.45)]"
+              >
                 <Camera className="h-4 w-4" />
                 {t("navConverter")}
               </Button>

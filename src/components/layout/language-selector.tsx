@@ -24,11 +24,11 @@ export function LanguageSelector() {
 
   return (
     <div className="relative inline-flex items-center" title="Idioma / Language">
-      <Globe className="h-4 w-4 absolute left-1.5 pointer-events-none text-gray-500" />
+      <Globe className="h-4 w-4 absolute left-3 pointer-events-none text-gray-500 stroke-[1.75]" />
       <select
         value={locale}
         onChange={(e) => handleChange(e.target.value)}
-        className="appearance-none bg-transparent pl-6 pr-1 py-1.5 text-sm rounded-lg border hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-300"
+        className="appearance-none cursor-pointer rounded-xl border border-[#E5E7EB] bg-white/70 pl-9 pr-3 py-2 text-sm font-medium text-gray-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:bg-white hover:shadow-[0_2px_8px_-2px_rgba(15,23,42,0.08)] hover:-translate-y-px focus:outline-none focus:ring-2 focus:ring-blue-300"
         aria-label="Idioma / Language"
       >
         {LOCALES.map((l) => (

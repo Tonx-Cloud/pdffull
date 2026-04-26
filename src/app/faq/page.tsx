@@ -60,7 +60,7 @@ const faqSections: { title: string; items: FaqItem[] }[] = [
       {
         question: "Quais as diferenças entre Free e Pro?",
         answer:
-          "O plano Free permite 5 conversões/mês com todas as funcionalidades básicas (conversão, download, compartilhamento). O plano Pro oferece conversões ilimitadas, armazenamento na nuvem, histórico completo e análise com IA.",
+          "O plano Free permite 5 conversões/mês com todas as funcionalidades básicas (conversão, download, compartilhamento). O plano Pro oferece conversões ilimitadas, armazenamento na nuvem e histórico completo.",
       },
       {
         question: "Como assinar o plano Pro?",
@@ -83,11 +83,6 @@ const faqSections: { title: string; items: FaqItem[] }[] = [
     title: "Funcionalidades",
     items: [
       {
-        question: "O que é a Análise com IA?",
-        answer:
-          "A análise com IA usa o Google Gemini para ler seu PDF e fornecer um resumo inteligente do conteúdo: tipo de documento, pontos principais, detalhes técnicos e observações. Você também pode fazer perguntas sobre o documento em um chat interativo.",
-      },
-      {
         question: "Como compartilhar um PDF?",
         answer:
           "Após gerar o PDF, clique em \"Compartilhar\". Você pode enviar por WhatsApp, Email, SMS ou copiar o link. No celular, também é possível usar o compartilhamento nativo do sistema operacional.",
@@ -95,7 +90,7 @@ const faqSections: { title: string; items: FaqItem[] }[] = [
       {
         question: "Posso acessar PDFs antigos?",
         answer:
-          "Sim! Todos os seus PDFs ficam salvos no Histórico. Lá você pode baixar, compartilhar, analisar com IA ou excluir qualquer conversão anterior.",
+          "Sim! Todos os seus PDFs ficam salvos no Histórico. Lá você pode baixar, compartilhar ou excluir qualquer conversão anterior.",
       },
       {
         question: "É possível selecionar e excluir vários PDFs de uma vez?",
@@ -151,11 +146,6 @@ const faqSections: { title: string; items: FaqItem[] }[] = [
         question: "O PDF ficou com qualidade ruim.",
         answer:
           "As imagens são comprimidas automaticamente para otimizar o tamanho do PDF. Para melhor resultado, tire fotos com boa iluminação e evite tremores. Imagens com resolução mínima de 1920px produzem bons resultados.",
-      },
-      {
-        question: "A análise com IA não funciona.",
-        answer:
-          'Certifique-se de que o PDF foi gerado recentemente e está salvo na nuvem. Se a mensagem "arquivo não disponível na nuvem" aparecer, tente gerar um novo PDF. A IA precisa do conteúdo do PDF para funcionar.',
       },
     ],
   },

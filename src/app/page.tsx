@@ -1,4 +1,4 @@
-import { FileText, Camera, Zap, Shield, ArrowRight, CheckCircle, Layers, Brain, Globe, BookOpen, Sparkles } from "lucide-react";
+import { FileText, Camera, Zap, Shield, ArrowRight, CheckCircle, Layers, Globe, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PwaInstallButton } from "@/components/pwa/pwa-install-button";
@@ -169,15 +169,6 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-start gap-3 rounded-xl border p-5">
-              <Brain className="h-5 w-5 text-orange-600 shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-sm">{t("featureAi")}</h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t("featureAiDesc")}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 rounded-xl border p-5">
               <Shield className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-sm">{t("featurePrivacy")}</h3>
@@ -277,12 +268,6 @@ export default function Home() {
                     <Button className="bg-blue-600 hover:bg-blue-700 gap-2">
                       <BookOpen className="h-4 w-4" />
                       {t("readerSectionCta")}
-                    </Button>
-                  </Link>
-                  <Link href="/leitor">
-                    <Button variant="outline" className="gap-2">
-                      <Sparkles className="h-4 w-4 text-orange-500" />
-                      {t("readerSectionProCta")}
                     </Button>
                   </Link>
                 </div>

@@ -45,7 +45,6 @@ export async function sendWelcomeEmail(to: string, name: string) {
           <li>5 conversões por mês</li>
           <li>Histórico das conversões</li>
           <li>Compartilhe via WhatsApp, Email ou SMS</li>
-          <li>Análise com IA (Gemini)</li>
         </ul>
       </div>
       <a href="https://www.pdf-full.com/converter"

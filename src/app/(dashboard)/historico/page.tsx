@@ -8,7 +8,6 @@ import {
   FileText,
   Download,
   Trash2,
-  Sparkles,
   CheckSquare,
   Square,
   Loader2,
@@ -23,11 +22,6 @@ import { Button } from "@/components/ui/button";
 import { ShareMenu } from "@/components/pwa/share-menu";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-
-const AiAnalysisModal = dynamic(
-  () => import("@/components/modals/ai-analysis-modal").then((m) => m.AiAnalysisModal),
-  { ssr: false }
-);
 
 const PdfViewerModal = dynamic(
   () => import("@/components/modals/pdf-viewer-modal").then((m) => m.PdfViewerModal),
@@ -59,7 +53,6 @@ export default function HistoricoPage() {
   const [deleting, setDeleting] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [merging, setMerging] = useState(false);
-  const [aiItem, setAiItem] = useState<Conversion | null>(null);
   const [viewerItem, setViewerItem] = useState<Conversion | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -386,14 +379,6 @@ export default function HistoricoPage() {
                   </button>
                 )}
 
-                <button
-                  onClick={() => setAiItem(c)}
-                  className="rounded-lg border p-2 hover:bg-purple-50 transition"
-                  title="Análise com IA"
-                >
-                  <Sparkles className="h-4 w-4 text-purple-600" />
-                </button>
-
                 <ShareMenu
                   pdfUrl={c.pdf_url}
                   filename={c.filename}
@@ -428,16 +413,6 @@ export default function HistoricoPage() {
             </div>
           ))}
         </div>
-      )}
-
-      {/* Modal IA */}
-      {aiItem && (
-        <AiAnalysisModal
-          open={!!aiItem}
-          onOpenChange={(open) => !open && setAiItem(null)}
-          pdfUrl={aiItem.pdf_url}
-          filename={aiItem.filename}
-        />
       )}
 
       {/* Modal Visualizador */}

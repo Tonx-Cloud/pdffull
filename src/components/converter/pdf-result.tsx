@@ -1,17 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Download, RotateCcw, Sparkles, UserPlus, Pencil, Check, Eye } from "lucide-react";
+import { Download, RotateCcw, UserPlus, Pencil, Check, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShareMenu } from "@/components/pwa/share-menu";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-
-const AiAnalysisModal = dynamic(
-  () => import("@/components/modals/ai-analysis-modal").then((m) => m.AiAnalysisModal),
-  { ssr: false }
-);
 
 const PdfViewerModal = dynamic(
   () => import("@/components/modals/pdf-viewer-modal").then((m) => m.PdfViewerModal),
@@ -36,7 +31,6 @@ export function PdfResult({
   const sizeKB = (pdfBlob.size / 1024).toFixed(0);
   const sizeMB = (pdfBlob.size / (1024 * 1024)).toFixed(1);
   const sizeLabel = pdfBlob.size > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
-  const [showAi, setShowAi] = useState(false);
   const [showViewer, setShowViewer] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [currentName, setCurrentName] = useState(filename);
@@ -142,25 +136,6 @@ export function PdfResult({
           {t("viewPdf")}
         </Button>
 
-        {isAnon ? (
-          <a
-            href="/login?next=/converter"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-accent"
-          >
-            <Sparkles className="h-4 w-4" />
-            {t("aiAnalysis")}
-          </a>
-        ) : (
-          <Button
-            variant="outline"
-            className="w-full gap-2"
-            onClick={() => setShowAi(true)}
-          >
-            <Sparkles className="h-4 w-4" />
-            {t("aiAnalysis")}
-          </Button>
-        )}
-
         <Button
           variant="ghost"
           className="gap-2 text-muted-foreground"
@@ -184,13 +159,6 @@ export function PdfResult({
             </p>
           </a>
         )}
-
-        <AiAnalysisModal
-          open={showAi}
-          onOpenChange={setShowAi}
-          pdfBlob={pdfBlob}
-          filename={currentName}
-        />
 
         <PdfViewerModal
           open={showViewer}

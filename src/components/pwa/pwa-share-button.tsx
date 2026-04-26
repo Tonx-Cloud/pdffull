@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Share2, Copy } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export function PwaShareButton({ className }: Readonly<{ className?: string }>) {
+  const t = useTranslations("Common");
   const [mounted, setMounted] = useState(false);
   const [canShare, setCanShare] = useState(false);
 
@@ -18,8 +20,8 @@ export function PwaShareButton({ className }: Readonly<{ className?: string }>) 
 
   const handleShare = async () => {
     const shareData = {
-      title: "PDFfULL",
-      text: "Converta fotos em PDF com um clique — grátis!",
+      title: t("appName"),
+      text: t("shareTagline"),
       url: globalThis.location.origin,
     };
 
@@ -36,9 +38,9 @@ export function PwaShareButton({ className }: Readonly<{ className?: string }>) 
     // Fallback desktop: copia link para a área de transferência
     try {
       await navigator.clipboard.writeText(shareData.url);
-      toast.success("Link copiado para a área de transferência");
+      toast.success(t("linkCopied"));
     } catch {
-      toast.error("Não foi possível compartilhar");
+      toast.error(t("shareError"));
     }
   };
 
@@ -52,7 +54,7 @@ export function PwaShareButton({ className }: Readonly<{ className?: string }>) 
         suppressHydrationWarning
       >
         <Share2 className="h-4 w-4" />
-        Compartilhar
+        {t("share")}
       </Button>
     );
   }
@@ -65,7 +67,7 @@ export function PwaShareButton({ className }: Readonly<{ className?: string }>) 
       onClick={handleShare}
     >
       {canShare ? <Share2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-      Compartilhar
+      {t("share")}
     </Button>
   );
 }

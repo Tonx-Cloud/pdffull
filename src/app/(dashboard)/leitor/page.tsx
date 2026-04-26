@@ -6,7 +6,6 @@ import {
   FileText,
   Upload,
   Download,
-  Sparkles,
   X,
   BookOpen,
   CheckCircle,
@@ -15,24 +14,9 @@ import { Button } from "@/components/ui/button";
 import { ShareMenu } from "@/components/pwa/share-menu";
 import { PwaInstallButton } from "@/components/pwa/pwa-install-button";
 import { useSharedFile } from "@/hooks/use-shared-file";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-
-const AiAnalysisModal = dynamic(
-  () =>
-    import("@/components/modals/ai-analysis-modal").then(
-      (m) => m.AiAnalysisModal
-    ),
-  { ssr: false }
-);
-
-const UpgradeModal = dynamic(
-  () =>
-    import("@/components/modals/upgrade-modal").then((m) => m.UpgradeModal),
-  { ssr: false }
-);
 
 const PdfViewer = dynamic(
   () => import("@/components/leitor/pdf-viewer").then((m) => m.PdfViewer),
@@ -45,27 +29,10 @@ export default function LeitorPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [filename, setFilename] = useState("documento.pdf");
   const [isDragging, setIsDragging] = useState(false);
-  const [showAi, setShowAi] = useState(false);
-  const [showUpgrade, setShowUpgrade] = useState(false);
-  const [isPro, setIsPro] = useState(false);
   const blobUrlRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { sharedFiles, clearSharedFiles } = useSharedFile();
-
-  // Verificar plano do usuário
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return;
-      const { data } = await supabase
-        .from("profiles")
-        .select("plan")
-        .eq("id", user.id)
-        .single();
-      setIsPro(data?.plan === "pro");
-    });
-  }, []);
 
   // Receber PDF via File Handler API / Share Target
   useEffect(() => {
@@ -175,14 +142,6 @@ export default function LeitorPage() {
     a.remove();
   };
 
-  const handleAiClick = () => {
-    if (!isPro) {
-      setShowUpgrade(true);
-      return;
-    }
-    setShowAi(true);
-  };
-
   // — Visualizador ativo —
   if (pdfUrl) {
     return (
@@ -208,20 +167,6 @@ export default function LeitorPage() {
             {pdfBlob && (
               <ShareMenu pdfBlob={pdfBlob} filename={filename} />
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAiClick}
-              className="gap-1"
-            >
-              <Sparkles className="h-4 w-4 text-orange-500" />
-              <span className="hidden sm:inline">{t("analyzeAi")}</span>
-              {!isPro && (
-                <span className="text-[10px] bg-blue-100 text-blue-700 px-1 rounded">
-                  {t("proBadge")}
-                </span>
-              )}
-            </Button>
             <Button variant="ghost" size="sm" onClick={closePdf} aria-label={t("closeLabel")}>
               <X className="h-4 w-4" />
             </Button>
@@ -254,18 +199,6 @@ export default function LeitorPage() {
             onChange={(e) => handleFileSelect(e.target.files)}
           />
         </div>
-
-        {showAi && pdfBlob && (
-          <AiAnalysisModal
-            open={showAi}
-            onOpenChange={setShowAi}
-            pdfBlob={pdfBlob}
-            filename={filename}
-          />
-        )}
-        {showUpgrade && (
-          <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} />
-        )}
       </div>
     );
   }
@@ -346,10 +279,6 @@ export default function LeitorPage() {
             {t("proPlanTitle")}
           </p>
           <ul className="space-y-1 text-xs text-muted-foreground">
-            <li className="flex items-center gap-1.5">
-              <CheckCircle className="h-3 w-3 text-blue-500 shrink-0" />
-              {t("proAiAnalysis")}
-            </li>
             <li className="flex items-center gap-1.5">
               <CheckCircle className="h-3 w-3 text-blue-500 shrink-0" />
               {t("proShareLink")}

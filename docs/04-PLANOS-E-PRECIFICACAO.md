@@ -16,7 +16,6 @@
 | Compartilhar via link | ✅ | ✅ |
 | Merge de PDFs | ✅ | ✅ |
 | Análise com IA (Gemini) | ✅ | ✅ |
-| OCR (extração de texto) | ✅ | ✅ |
 | Renomear PDFs | ✅ | ✅ |
 | Histórico na nuvem | ❌ | ✅ |
 | PDFs salvos no R2 | ❌ | ✅ |

@@ -40,7 +40,7 @@
 - **Fase 4**: Segurança (CSP, HMAC webhook, rate limit, sanitize)
 - **Fase 5**: Compartilhamento (WhatsApp, Email, Web Share API)
 - **Fase 6**: Exclusão de conversões (com cleanup R2)
-- **Fase 7**: IA (Gemini análise, OCR, chat sobre PDF)
+- **Fase 7**: IA (Gemini análise, chat sobre PDF)
 - **Fase 8**: Emails transacionais (Resend)
 - **Fase 9**: PWA install/share buttons
 - **Fase 10**: Rename PDF, PDF viewer

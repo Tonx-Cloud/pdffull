@@ -35,7 +35,7 @@
 | **FASE 7** | 7 | ✅ | Bugfixes, Storage, FAQ & Docs |
 | **FASE 8** | 5 | ✅ | Bugfixes Produção (Upload, Share, Email) |
 | **FASE 9** | 6 | ✅ | Freemium sem Login + PWA + Rename |
-| **FASE 10** | 5 | ✅ | OCR, Edição Inteligente & Leitor PDF |
+| **FASE 10** | 5 | ✅ | Análise IA & Leitor PDF |
 | **FASE 11** | 7 | ✅ | UX Bugs, Merge PDFs, Hamburger, i18n |
 | **FASE 12** | 4 | ✅ | Domínio Customizado (pdf-full.com) |
 | **FASE 13** | 3 | ✅ | Testes E2E Produção (Playwright) |
@@ -254,18 +254,18 @@
 
 ---
 
-## FASE 10 — OCR, Edição Inteligente & Leitor PDF
+## FASE 10 — Análise IA & Leitor PDF
 
 > **Objetivo:** Extrair texto de imagens via IA, permitir edição em Markdown e visualizar PDFs  
 > **Pré-requisito:** Fase 9 concluída  
-> **Entrega:** OCR funcional, editor Markdown com preview, leitor PDF integrado
+> **Entrega:** Análise IA via Gemini, leitor PDF integrado
 
 | # | Tarefa | Detalhes | Status |
 |---|--------|----------|:------:|
-| 10.1 | ✅ | **OCR via Gemini** — Endpoint `/api/ocr` recebe imagem e retorna texto extraído via Gemini 2.0 Flash. Botão "Extrair Texto" no converter |
-| 10.2 | ✅ | **Editor Markdown** — Modal com textarea para editar texto extraído do OCR. Preview lado a lado com formatação |
+| 10.1 | ❌ | ~~**OCR via Gemini** — Endpoint `/api/ocr` recebe imagem e retorna texto extraído via Gemini 2.0 Flash~~ **(Removido do frontend — funcionalidade OCR descontinuada)** |
+| 10.2 | ❌ | ~~**Editor Markdown** — Modal com textarea para editar texto extraído do OCR. Preview lado a lado com formatação~~ **(Removido com OCR)** |
 | 10.3 | ✅ | **Markdown → PDF** — Converter texto Markdown editado para PDF formatado usando jsPDF com estilos |
-| 10.4 | ✅ | **Integrar no Modal IA** — Unificar OCR, edição e análise no modal de IA. Abas: "Análise" / "Extrair Texto" |
+| 10.4 | ✅ | **Modal de Análise IA** — Modal de chat sobre PDF integrado ao resultado da conversão e ao histórico (OCR removido) |
 | 10.5 | ✅ | **Leitor PDF integrado** — Componente viewer com iframe para abrir PDFs dentro do app. Botão "Visualizar PDF" no histórico e no resultado |
 
 ---

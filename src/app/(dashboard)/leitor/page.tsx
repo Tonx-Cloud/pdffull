@@ -352,10 +352,6 @@ export default function LeitorPage() {
             </li>
             <li className="flex items-center gap-1.5">
               <CheckCircle className="h-3 w-3 text-blue-500 shrink-0" />
-              {t("proOcr")}
-            </li>
-            <li className="flex items-center gap-1.5">
-              <CheckCircle className="h-3 w-3 text-blue-500 shrink-0" />
               {t("proShareLink")}
             </li>
             <li className="flex items-center gap-1.5">

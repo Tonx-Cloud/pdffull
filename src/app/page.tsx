@@ -1,4 +1,4 @@
-import { FileText, Camera, Zap, Shield, ArrowRight, CheckCircle, Layers, Globe, BookOpen, Smartphone, Cpu, Lock } from "lucide-react";
+import { FileText, Camera, Zap, Shield, ArrowRight, CheckCircle, Layers, Globe, BookOpen, Smartphone, Cpu, Lock, Info, HelpCircle, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PwaInstallButton } from "@/components/pwa/pwa-install-button";
@@ -11,49 +11,69 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header — Navegação completa para sitelinks do Google */}
-      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur px-4 py-3">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-blue-600">
-            PDFfULL
+      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 shrink-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+              <FileText className="h-4 w-4 text-white" />
+            </div>
+            <span className="text-lg font-bold text-blue-600">PDFfULL</span>
           </Link>
-          <nav className="hidden md:flex gap-6 items-center text-sm">
-            <Link href="/sobre" className="text-muted-foreground hover:text-blue-600 transition-colors">
+
+          {/* Nav secundária (desktop) */}
+          <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
+            <Link
+              href="/sobre"
+              className="flex items-center gap-1.5 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
+            >
+              <Info className="h-4 w-4" />
               {t("navAbout")}
             </Link>
-            <Link href="/faq" className="text-muted-foreground hover:text-blue-600 transition-colors">
+            <Link
+              href="/faq"
+              className="flex items-center gap-1.5 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
+            >
+              <HelpCircle className="h-4 w-4" />
               {t("navFaq")}
             </Link>
-            <Link href="/converter" className="text-muted-foreground hover:text-blue-600 transition-colors">
-              {t("navConverter")}
-            </Link>
-            <Link href="/leitor" className="text-muted-foreground hover:text-blue-600 transition-colors">
+            <Link
+              href="/leitor"
+              className="flex items-center gap-1.5 rounded-md px-3 py-2 text-muted-foreground hover:bg-gray-100 hover:text-blue-600 transition-colors"
+            >
+              <BookOpen className="h-4 w-4" />
               {t("navReader")}
             </Link>
+          </nav>
+
+          {/* Ações (desktop) */}
+          <div className="hidden md:flex items-center gap-2">
             <LanguageSelector />
+            <div className="h-6 w-px bg-border" aria-hidden />
             <Link href="/login">
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" className="gap-1.5">
+                <LogIn className="h-4 w-4" />
                 {t("navLogin")}
               </Button>
             </Link>
             <Link href="/converter">
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+              <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700 shadow-sm">
+                <Camera className="h-4 w-4" />
                 {t("navConvertNow")}
               </Button>
             </Link>
-          </nav>
-          <nav className="flex md:hidden gap-2 items-center">
+          </div>
+
+          {/* Ações (mobile) — apenas CTA + idioma */}
+          <div className="flex md:hidden items-center gap-2">
             <LanguageSelector />
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
-                {t("navLogin")}
-              </Button>
-            </Link>
             <Link href="/converter">
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+              <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700">
+                <Camera className="h-4 w-4" />
                 {t("navConverter")}
               </Button>
             </Link>
-          </nav>
+          </div>
         </div>
       </header>
 
